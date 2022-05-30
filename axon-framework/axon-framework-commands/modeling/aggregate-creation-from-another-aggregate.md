@@ -1,4 +1,8 @@
-# Aggregate Creation from another Aggregate
+---
+description: Aggregate Creation from another Aggregate
+---
+
+# 从另一个聚合创建聚合
 
 Regularly, instantiating a new Aggregate is done by issuing a creation command which is handled by a `@CommandHandler` annotated Aggregate constructor. Such commands could for example be published by a simple [REST endpoint](https://github.com/domaincomponents/reference-guide/tree/7ae838faa2d2d8045603b108c1e042f7452f59dc/implementing-domain-logic/connecting-the-ui/command-publishing-use-cases.md) or an [Event Handling Component ](../../events/event-handlers.md)as a reaction to a certain event. Sometimes the Domain however describes certain Entities to be created from another Entity. In this scenario it would thus be more faithful to the domain to instantiate an Aggregate from it's parent Aggregate.
 
@@ -51,4 +55,3 @@ Note that a `ChildAggregateCreatedEvent` is explicitly applied to notify the `Ch
 > Creation of a new Aggregate should be done in a command handler rather than in an event sourcing handler. The rationale behind this is that you do not want to create new child Aggregates when a parent Aggregate is sourced from its events, as this would undesirably create new child Aggregate instances
 >
 > If the `createNew` method is however accidentally called within an event sourcing handler, an `UnsupportedOperationException` will be thrown as stop gap solution.
-

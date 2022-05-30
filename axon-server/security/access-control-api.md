@@ -1,6 +1,10 @@
-# Access Control on the REST and gRPC APIs
+---
+description: Access Control - API
+---
 
-When access control for Axon Server is enabled, you'll need to provide user credentials or a token. The UI uses username and password to establish a session, while the [CLI can use a token](access-control-cli.md). If you are using tools such as "`curl`", or have coded your own tool to access the REST API, you'll need to do this also. The gRPC APIs do _not_ accept user credentials, but always expect a token. Note that the internal API (by default on port 8224) will only accept the "internal-token", while the client API (by default on port 8124) will only accept application tokens. 
+# 访问控制 - REST API
+
+When access control for Axon Server is enabled, you'll need to provide user credentials or a token. The UI uses username and password to establish a session, while the [CLI can use a token](access-control-cli.md). If you are using tools such as "`curl`", or have coded your own tool to access the REST API, you'll need to do this also. The gRPC APIs do _not_ accept user credentials, but always expect a token. Note that the internal API (by default on port 8224) will only accept the "internal-token", while the client API (by default on port 8124) will only accept application tokens.
 
 ## Passing User Credentials to the REST API
 

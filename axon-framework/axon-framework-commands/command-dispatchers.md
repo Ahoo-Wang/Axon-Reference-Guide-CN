@@ -1,4 +1,8 @@
-# Command Dispatchers
+---
+description: Command Dispatchers
+---
+
+# 命令调度器
 
 The [Command Handlers](command-handlers.md) pages provide the background on how to handle command messages in your application. The dispatching process is the starting point of such a command message. Axon provides two interfaces you can use to send the commands to your command handlers, being:
 
@@ -43,45 +47,40 @@ public void dispatchCommands() {
 The `CommandDispatcher` described above exemplifies a couple of important aspects and capabilities of the dispatching commands:
 
 1. The `CommandBus` interface providing the functionality to dispatch command messages.
-2. The aggregate identifier is, per best practice, initialized as the String of a random unique identifier.
+2.  The aggregate identifier is, per best practice, initialized as the String of a random unique identifier.
 
-   Typed identifier objects are also possible, as long as the object implements a sensible `toString()` function.
+    Typed identifier objects are also possible, as long as the object implements a sensible `toString()` function.
+3.  The `GenericCommandMessage#asCommandMessage(Object)` method is used to create a `CommandMessage`.
 
-3. The `GenericCommandMessage#asCommandMessage(Object)` method is used to create a `CommandMessage`.
+    To be able to dispatch a command on the `CommandBus`, you are required to wrap your own command object (e.g. the 'command message payload') in a `CommandMessage`.
 
-   To be able to dispatch a command on the `CommandBus`, you are required to wrap your own command object \(e.g. the 'command message payload'\) in a `CommandMessage`.
+    The `CommandMessage` also allows the addition of [MetaData](../messaging-concepts/anatomy-message.md#meta-data) to the Command Message.
+4.  The `CommandBus#dispatch(CommandMessage)` function will dispatch the provided `CommandMessage` on the bus, for delivery to a command handler.
 
-   The `CommandMessage` also allows the addition of [MetaData](../messaging-concepts/anatomy-message.md#meta-data) to the Command Message.
+    If an application isn't directly interested in the outcome of a command, this method can be used.
+5.  If the outcome of command handling is relevant for your application, the optional second parameter can be provided, the `CommandCallback`.
 
-4. The `CommandBus#dispatch(CommandMessage)` function will dispatch the provided `CommandMessage` on the bus, for delivery to a command handler.
+    The `CommandCallback` allows the dispatching component to be notified when command handling is completed.
+6.  The Command Callback has one function, `onResult(CommandMessage, CommandResultMessage)`, which is called when command handling has finished.
 
-   If an application isn't directly interested in the outcome of a command, this method can be used.
+    The first parameter is the dispatched command, whilst the second is execution result of the dispatched command.
 
-5. If the outcome of command handling is relevant for your application, the optional second parameter can be provided, the `CommandCallback`.
+    Lastly, the `CommandCallback` is a 'functional interface' due to `onResult` being its only method.
 
-   The `CommandCallback` allows the dispatching component to be notified when command handling is completed.
+    As such, `commandBus.dispatch(commandMessage, (cmdMsg, commandResultMessage) -> { /* ... */ })` would also be possible.
+7.  The `CommandResultMessage` provides the API to verify whether command execution was exceptional or successful.
 
-6. The Command Callback has one function, `onResult(CommandMessage, CommandResultMessage)`, which is called when command handling has finished.
+    If `CommandResultMessage#isExceptional` returns true, you can assume that the `CommandResultMessage#exceptionResult` will return a `Throwable` instance containing the actual exception.
 
-   The first parameter is the dispatched command, whilst the second is execution result of the dispatched command.
-
-   Lastly, the `CommandCallback` is a 'functional interface' due to `onResult` being its only method.
-
-   As such, `commandBus.dispatch(commandMessage, (cmdMsg, commandResultMessage) -> { /* ... */ })` would also be possible.
-
-7. The `CommandResultMessage` provides the API to verify whether command execution was exceptional or successful.
-
-   If `CommandResultMessage#isExceptional` returns true, you can assume that the `CommandResultMessage#exceptionResult` will return a `Throwable` instance containing the actual exception.
-
-   Otherwise, the `CommandResultMessage#getPayload` method _may_ provide you with an actual result or `null`, as further specified here.
+    Otherwise, the `CommandResultMessage#getPayload` method _may_ provide you with an actual result or `null`, as further specified here.
 
 > **Command Callback consideration**
 >
-> In the case that `dispatch(CommandMessage, CommandCallback)` is used, the calling component may _not_ assume that the callback is invoked in the same thread that dispatched the command. If the calling thread depends on the result before continuing, you can use the `FutureCallback`. The `FutureCallback` is a combination of a `Future` \(as defined in the java.concurrent package\) and Axon's `CommandCallback`. Alternatively, consider using a `CommandGateway`.
+> In the case that `dispatch(CommandMessage, CommandCallback)` is used, the calling component may _not_ assume that the callback is invoked in the same thread that dispatched the command. If the calling thread depends on the result before continuing, you can use the `FutureCallback`. The `FutureCallback` is a combination of a `Future` (as defined in the java.concurrent package) and Axon's `CommandCallback`. Alternatively, consider using a `CommandGateway`.
 
 ## The Command Gateway
 
-The 'Command Gateway' is a convenience approach towards dispatching commands. It does so by abstracting certain aspects for you when dispatching a command on the `CommandBus`. It this uses the `CommandBus` underneath to perform the actual dispatching of the message.  
+The 'Command Gateway' is a convenience approach towards dispatching commands. It does so by abstracting certain aspects for you when dispatching a command on the `CommandBus`. It this uses the `CommandBus` underneath to perform the actual dispatching of the message.\
 While you are not required to use a gateway to dispatch commands, it is generally the easiest option to do so.
 
 The `CommandGateway` interface can be separated in two sets of methods, namely `send` and `sendAndWait`:
@@ -100,21 +99,19 @@ public void sendCommand() {
 
 The `send` API as shown above introduces a couple of concepts, marked with numbered comments:
 
-1. The `CommandGateway` interface providing the functionality to dispatch command messages.
+1.  The `CommandGateway` interface providing the functionality to dispatch command messages.
 
-   It does so by internally leveraging the `CommandBus` interface [dispatch messages](command-dispatchers.md#the-command-bus).
+    It does so by internally leveraging the `CommandBus` interface [dispatch messages](command-dispatchers.md#the-command-bus).
+2.  The aggregate identifier is, per best practice, initialized as the String of a random unique identifier.
 
-2. The aggregate identifier is, per best practice, initialized as the String of a random unique identifier.
+    Typed identifier objects are also possible, as long as the object implements a sensible `toString()` function.
+3.  The `send(Object)` function requires a single parameter, the command object.
 
-   Typed identifier objects are also possible, as long as the object implements a sensible `toString()` function.
+    This is an asynchronous approach to dispatching commands.
 
-3. The `send(Object)` function requires a single parameter, the command object.
+    As such the response of the `send` method is a `CompletableFuture`.
 
-   This is an asynchronous approach to dispatching commands.
-
-   As such the response of the `send` method is a `CompletableFuture`.
-
-   This allows for chaining of follow up operations _after_ the command [result](command-dispatchers.md#command-dispatching-results) has been returned.
+    This allows for chaining of follow up operations _after_ the command [result](command-dispatchers.md#command-dispatching-results) has been returned.
 
 > **Callback when using `send(Object)`**
 >
@@ -136,19 +133,18 @@ public void sendCommandAndWaitOnResult() {
 // omitted class, constructor and result usage
 ```
 
-1. The `CommandGateway#sendAndWait(Object)` function takes in a single parameter, your command object.
+1.  The `CommandGateway#sendAndWait(Object)` function takes in a single parameter, your command object.
 
-   It will wait indefinitely until the command dispatching and handling process has been resolved.
+    It will wait indefinitely until the command dispatching and handling process has been resolved.
 
-   The result returned by this method can either be successful or exceptional, as will be explained [here](command-dispatchers.md#command-dispatching-results).
+    The result returned by this method can either be successful or exceptional, as will be explained [here](command-dispatchers.md#command-dispatching-results).
+2.  If waiting indefinitely is not desirable, a 'timeout' paired with the 'time unit' can be provided along side the command object.
 
-2. If waiting indefinitely is not desirable, a 'timeout' paired with the 'time unit' can be provided along side the command object.
+    Doing so will ensure that the command dispatching thread will not wait longer than specified.
 
-   Doing so will ensure that the command dispatching thread will not wait longer than specified.
+    If command dispatching/handling was interrupted or the timeout was reached whilst using this approach, the command result will be `null`.
 
-   If command dispatching/handling was interrupted or the timeout was reached whilst using this approach, the command result will be `null`.
-
-   In all other scenarios, the result follows the [referenced](command-dispatchers.md#command-dispatching-results) approach.
+    In all other scenarios, the result follows the [referenced](command-dispatchers.md#command-dispatching-results) approach.
 
 ## Command Dispatching Results
 
@@ -159,9 +155,8 @@ Dispatching commands will, generally speaking, have two possible outcomes:
 
 The outcome to some extent depends on the dispatching process, but more so on the implementation of the command handler. Thus if the `@CommandHandler` annotated function throws an exception due to some business logic, it will be that exception which will be the result of dispatching the command.
 
-The successful resolution of command handling intentionally _should not_ provide any return objects. Thus, if the `CommandBus`/`CommandGateway` provides a response \(either directly or through the `CommandResultMessage)`, then you should assume the result of successful command handling to return `null`.
+The successful resolution of command handling intentionally _should not_ provide any return objects. Thus, if the `CommandBus`/`CommandGateway` provides a response (either directly or through the `CommandResultMessage)`, then you should assume the result of successful command handling to return `null`.
 
 While it is possible to return results from command handlers, this should be used sparsely. The intent of the Command should never be to retrieve a value, as that would be an indication that the message should be designed as a [Query Message](../queries/). Exceptions to this would be the identifier of the Aggregate Root, or identifiers of entities the Aggregate Root has instantiated. The framework has one such exception build in, on the `@CommandHandler` annotated constructor of an Aggregate. In case the 'command handling constructor' has executed successfully, instead of the Aggregate itself, the value of the `@AggregateIdentifier` annotated field will be returned.
 
-[Axon Coding Tutorial \#5: - Connecting the UI](https://youtu.be/lxonQnu1txQ)
-
+[Axon Coding Tutorial #5: - Connecting the UI](https://youtu.be/lxonQnu1txQ)

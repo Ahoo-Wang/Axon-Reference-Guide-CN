@@ -1,4 +1,8 @@
-# Command Handlers
+---
+description: Command Handlers
+---
+
+# 命令处理程序
 
 ## Aggregate Command Handlers
 
@@ -8,13 +12,12 @@ To define a Command Handler in an Aggregate, simply annotate the method which sh
 
 Command Messages can also be [dispatched](command-dispatchers.md) with different _command names_. To be able to handle those correctly, the `String commandName` value can be specified in the `@CommandHandler` annotation.
 
-In order for Axon to know which instance of an Aggregate type should handle the Command Message, the property carrying the Aggregate Identifier in the command object **must** be annotated with `@TargetAggregateIdentifier`. The annotation may be placed on either the field or an accessor method \(e.g. a getter\) in the Command object.
+In order for Axon to know which instance of an Aggregate type should handle the Command Message, the property carrying the Aggregate Identifier in the command object **must** be annotated with `@TargetAggregateIdentifier`. The annotation may be placed on either the field or an accessor method (e.g. a getter) in the Command object.
 
 > **Routing in a distributed environment**
-> 
-> Regardless of the type of command, as soon as you start distributing your application (through Axon Server, for example), it is recommended to specify a routing key on the command. 
-> This is the job of the `@TargetAggregateIdentifier`, but in absence of a field worthy of the annotation, the `@RoutingKey` annotation should be added to ensure the command can be routed.
-> 
+>
+> Regardless of the type of command, as soon as you start distributing your application (through Axon Server, for example), it is recommended to specify a routing key on the command. This is the job of the `@TargetAggregateIdentifier`, but in absence of a field worthy of the annotation, the `@RoutingKey` annotation should be added to ensure the command can be routed.
+>
 > If neither annotation works for your use case, a different `RoutingStrategy` can be configured, as is explained in the [Routing Strategy](infrastructure.md#routing-strategy) section.
 
 Taking the `GiftCard` Aggregate as an example, we can identify two Command Handlers on the Aggregate:
@@ -86,14 +89,11 @@ public class RedeemCardCommand {
 
 The `cardId` present in both commands is the reference to a `GiftCard` instance and thus is annotated with the `@TargetAggregateIdentifier` annotation. Commands that create an Aggregate instance do not need to identify the target aggregate identifier, as there is no Aggregate in existence yet. It is nonetheless recommended for consistency to annotate the Aggregate Identifier on them as well.
 
-If you prefer to use another mechanism for routing commands, the behavior can be overridden by supplying a custom `CommandTargetResolver`. This class should return the Aggregate Identifier and expected version \(if any\) based on a given command.
+If you prefer to use another mechanism for routing commands, the behavior can be overridden by supplying a custom `CommandTargetResolver`. This class should return the Aggregate Identifier and expected version (if any) based on a given command.
 
 > **Aggregate Creation Command Handlers**
 >
-> When the `@CommandHandler` annotation is placed on an aggregate's constructor, the respective command will create a new instance of that aggregate and add it to the repository. 
-> Those commands do not require to target a specific aggregate instance. 
-> Therefore, those commands need neither the `@TargetAggregateIdentifier` nor the `@TargetAggregateVersion` annotation.
-> Furthermore, a custom `CommandTargetResolver` will not be invoked for these commands.
+> When the `@CommandHandler` annotation is placed on an aggregate's constructor, the respective command will create a new instance of that aggregate and add it to the repository. Those commands do not require to target a specific aggregate instance. Therefore, those commands need neither the `@TargetAggregateIdentifier` nor the `@TargetAggregateVersion` annotation. Furthermore, a custom `CommandTargetResolver` will not be invoked for these commands.
 
 ### Business Logic and State Changes
 
@@ -109,7 +109,7 @@ The[ Aggregate Test Fixture](../testing/commands-events.md) will guard from unin
 
 ### Applying Events from Event Sourcing Handlers
 
-In some cases, especially when the Aggregate structure grows beyond just a couple of Entities, it is cleaner to react on events being published in other Entities of the same Aggregate \(multi Entity Aggregates are explained in more detail [here](modeling/multi-entity-aggregates.md)\). However, since the Event Handling methods are also invoked when reconstructing Aggregate state, special precautions must be taken.
+In some cases, especially when the Aggregate structure grows beyond just a couple of Entities, it is cleaner to react on events being published in other Entities of the same Aggregate (multi Entity Aggregates are explained in more detail [here](modeling/multi-entity-aggregates.md)). However, since the Event Handling methods are also invoked when reconstructing Aggregate state, special precautions must be taken.
 
 It is possible to `apply()` new events inside an Event Sourcing Handler method. This makes it possible for an Entity 'B' to apply an event in reaction to Entity 'A' doing something. Axon will ignore the `apply()`invocation when replaying historic events upon sourcing the given Aggregate. Do note that in the scenario where Event Messages are published from an Event Sourcing Handler, the Event of the inner `apply()` invocation is only published to the entities after all entities have received the first event. If more events need to be published, based on the state of an entity after applying an inner event, use `apply(...).andThenApply(...)`.
 
@@ -157,24 +157,19 @@ public class GiftCard {
 
 As is shown above, the `@CreationPolicy` annotation requires stating the `AggregateCreationPolicy`. This enumeration has the following options available:
 
-* `ALWAYS` - A creation policy of "always" will expect to instantiate the aggregate.
-  This effectively works like a command handler annotated constructor.
-  Without defining a return type, the aggregate identifier used during the creation will be returned.
-  Through this approach, it is possible to return other results next to the aggregate identifier.
+* `ALWAYS` - A creation policy of "always" will expect to instantiate the aggregate. This effectively works like a command handler annotated constructor. Without defining a return type, the aggregate identifier used during the creation will be returned. Through this approach, it is possible to return other results next to the aggregate identifier.
+*   `CREATE_IF_MISSING` - A creation policy of "create if missing" can either create an aggregate or act on an existing instance.
 
-* `CREATE_IF_MISSING` - A creation policy of "create if missing" can either create an aggregate or act on an existing instance.
+    This policy should be regarded as a create or update approach of an aggregate.
+*   `NEVER` - A creation policy of "never" will be handled on an existing aggregate instance.
 
-  This policy should be regarded as a create or update approach of an aggregate.
-
-* `NEVER` - A creation policy of "never" will be handled on an existing aggregate instance.
-
-  This effectively works like any regular command handler annotated method.
+    This effectively works like any regular command handler annotated method.
 
 ## External Command Handlers
 
-Command handling functions are most often directly placed on the Aggregate \(as described in more detail [here](command-handlers.md#aggregate-command-handlers)\). There are situations however where it is not possible nor desired to route a command directly to an Aggregate instance. Message handling functions, like Command Handlers, can however be placed on any object. It is thus possible to instantiate a 'Command Handling Object'.
+Command handling functions are most often directly placed on the Aggregate (as described in more detail [here](command-handlers.md#aggregate-command-handlers)). There are situations however where it is not possible nor desired to route a command directly to an Aggregate instance. Message handling functions, like Command Handlers, can however be placed on any object. It is thus possible to instantiate a 'Command Handling Object'.
 
-A Command Handling Object is a simple \(regular\) object, which has `@CommandHandler` annotated methods. Unlike with Aggregates, there is only a _single_ instance of a Command Handling Object, which handles **all** commands of the types it declares in its methods:
+A Command Handling Object is a simple (regular) object, which has `@CommandHandler` annotated methods. Unlike with Aggregates, there is only a _single_ instance of a Command Handling Object, which handles **all** commands of the types it declares in its methods:
 
 ```java
 import org.axonframework.commandhandling.CommandHandler;
@@ -197,17 +192,14 @@ public class GiftCardCommandHandler {
 
 In the above snippet we have decided that the `RedeemCardCommand` should no longer be directly handled on the `GiftCard`. Instead, we load the `GiftCard` manually and execute the desired method on it:
 
-1. The `Repository` for the `GiftCard` Aggregate, used for retrieval and storage of an Aggregate.
+1.  The `Repository` for the `GiftCard` Aggregate, used for retrieval and storage of an Aggregate.
 
-   If `@CommandHandler` methods are placed directly on the Aggregate, Axon will automatically know to call the `Repository` to load a given instance.
+    If `@CommandHandler` methods are placed directly on the Aggregate, Axon will automatically know to call the `Repository` to load a given instance.
 
-   It is thus _not_ mandatory to directly access the `Repository`, but a [design choice](../../architecture-overview/#separation-of-business-logic-and-infrastructure).
+    It is thus _not_ mandatory to directly access the `Repository`, but a [design choice](../../architecture-overview/#separation-of-business-logic-and-infrastructure).
+2.  To load the intended `GiftCard` Aggregate instance, the `Repository#load(String)` method is used.
 
-2. To load the intended `GiftCard` Aggregate instance, the `Repository#load(String)` method is used.
+    The provided parameter should be the Aggregate identifier.
+3.  After that Aggregate has been loaded, the `Aggregate#execute(Consumer)` function should be invoked to perform an operation on the Aggregate.
 
-   The provided parameter should be the Aggregate identifier.
-
-3. After that Aggregate has been loaded, the `Aggregate#execute(Consumer)` function should be invoked to perform an operation on the Aggregate.
-
-   Using the `execute` function ensure that the Aggregate life cycle is correctly started.
-
+    Using the `execute` function ensure that the Aggregate life cycle is correctly started.

@@ -1,8 +1,12 @@
-# Implementation
+---
+description: Implementation
+---
+
+# 实现
 
 A Saga is a special type of event listener: one that manages a business transaction. Some transactions could be running for days or even weeks, while others are completed within a few milliseconds. In Axon, each instance of a Saga is responsible for managing a single business transaction. That means a Saga maintains state necessary to manage that transaction, continuing it or taking compensating actions to roll back any actions already taken. Typically, and contrary to regular event listeners, a saga has a starting point and an end, both triggered by events. While the starting point of a saga is usually very clear, there could be many ways for a saga to end.
 
-In Axon, sagas are classes that define one or more `@SagaEventHandler` methods. Unlike regular event handlers, multiple instances of a saga may exist at any time. Sagas are managed by a single event processor \(Tracking or Subscribing\), which is dedicated to dealing with events for that specific saga type.
+In Axon, sagas are classes that define one or more `@SagaEventHandler` methods. Unlike regular event handlers, multiple instances of a saga may exist at any time. Sagas are managed by a single event processor (Tracking or Subscribing), which is dedicated to dealing with events for that specific saga type.
 
 ## Life cycle
 
@@ -10,7 +14,7 @@ A single Saga instance is responsible for managing a single transaction. That me
 
 In a saga, event handlers are annotated with `@SagaEventHandler`. If a specific event signifies the start of a transaction, add another annotation to that same method: `@StartSaga`. This annotation will create a new saga and invoke its event handler method when a matching event is published.
 
-By default, a new saga is only started if no suitable existing saga \(of the same type\) can be found. You can also force the creation of a new saga instance by setting the `forceNew` property on the `@StartSaga` annotation to `true`.
+By default, a new saga is only started if no suitable existing saga (of the same type) can be found. You can also force the creation of a new saga instance by setting the `forceNew` property on the `@StartSaga` annotation to `true`.
 
 Ending a saga can be done in two ways. If a certain event always indicates the end of a saga its life cycle, annotate that event handler on the saga with `@EndSaga`. The saga its life cycle will be ended after the invocation of the handler. Alternatively, you can call `SagaLifecycle.end()` from inside the saga to end the life cycle. This allows you to conditionally end the saga.
 
@@ -18,9 +22,9 @@ Ending a saga can be done in two ways. If a certain event always indicates the e
 
 Event handling in a saga is quite comparable to that of a regular event listener. The same rules for method and parameter resolution are valid here. There is one major difference, though. While there is a single instance of an event listener that deals with all incoming events, multiple instances of a saga may exist, each interested in different events. For example, a saga that manages a transaction around an Order with Id "1" will not be interested in events regarding Order "2", and vice versa.
 
-Instead of publishing all events to all saga instances \(which would be a complete waste of resources\), Axon will only publish events containing properties that the saga has been associated with. This is done using `AssociationValue`s. An `AssociationValue` consists of a key and a value. The key represents the type of identifier used, for example "orderId" or "order". The value represents the corresponding value, "1" or "2" in the previous example.
+Instead of publishing all events to all saga instances (which would be a complete waste of resources), Axon will only publish events containing properties that the saga has been associated with. This is done using `AssociationValue`s. An `AssociationValue` consists of a key and a value. The key represents the type of identifier used, for example "orderId" or "order". The value represents the corresponding value, "1" or "2" in the previous example.
 
-The order in which `@SagaEventHandler` annotated methods are evaluated is identical to that of `@EventHandler` methods \(see [Annotated event handler](../events/event-handlers.md)\). A method matches if the parameters of the handler method match the incoming event, and if the saga has an association with the property defined on the handler method.
+The order in which `@SagaEventHandler` annotated methods are evaluated is identical to that of `@EventHandler` methods (see [Annotated event handler](../events/event-handlers.md)). A method matches if the parameters of the handler method match the incoming event, and if the saga has an association with the property defined on the handler method.
 
 The `@SagaEventHandler` annotation has two attributes, of which `associationProperty` is the most important one. This is the name of the property on the incoming event that should be used to find associated sagas. The key of the association value is the name of the property. The value is the value returned by property its getter method.
 
@@ -38,7 +42,7 @@ For that purpose, there is the `ResourceInjector`. It is used by the `SagaReposi
 >
 > Since resources should not be persisted with the saga, make sure to add the `transient` keyword to those fields. This will prevent the serialization mechanism to attempt to write the contents of these fields to the repository. The repository will automatically re-inject the required resources after a saga has been deserialized.
 
-The `SimpleResourceInjector` allows for a pre-specified collection of resources to be injected. It scans the \(setter\) methods and fields of a Saga to find ones that are annotated with `@Inject`.
+The `SimpleResourceInjector` allows for a pre-specified collection of resources to be injected. It scans the (setter) methods and fields of a Saga to find ones that are annotated with `@Inject`.
 
 When using the Configuration API, Axon will default to the `ConfigurationResourceInjector`. It will inject any resource available in the configuration. Components like the `EventBus`, `EventStore`, `CommandBus` and `CommandGateway` are available by default. You can also register your own components using `configurer.registerComponent()`.
 
@@ -50,19 +54,15 @@ Events need to be redirected to the appropriate saga instances. To do so, some i
 
 ### Saga Manager
 
-Like any component that handles events, the processing is done by an [Event Processor](../events/event-processors/README.md). 
-However, Sagas are not singleton instances handling events. 
-They have individual life cycles that need to be managed.
+Like any component that handles events, the processing is done by an [Event Processor](../events/event-processors/). However, Sagas are not singleton instances handling events. They have individual life cycles that need to be managed.
 
-Axon supports life cycle management through the `AnnotatedSagaManager`, which is provided to an Event Processor to perform the actual invocation of handlers. 
-It is initialized using the type of the Saga to manage, as well as a [`SagaRepository`](#saga-repository-and-saga-store) where Sagas of that type can be stored and retrieved. 
-A single `AnnotatedSagaManager` can only manage a single Saga type.
+Axon supports life cycle management through the `AnnotatedSagaManager`, which is provided to an Event Processor to perform the actual invocation of handlers. It is initialized using the type of the Saga to manage, as well as a [`SagaRepository`](implementation.md#saga-repository-and-saga-store) where Sagas of that type can be stored and retrieved. A single `AnnotatedSagaManager` can only manage a single Saga type.
 
 ### Saga repository and saga store
 
 The `SagaRepository` is responsible for storing and retrieving sagas, for use by the `SagaManager`. It is capable of retrieving specific saga instances by their identifier as well as by their association values.
 
-There are some special requirements, however. Since concurrency handling in sagas is a very delicate procedure, the repository must ensure that for each conceptual saga instance \(with an equal identifier\) only a single instance exists in the JVM.
+There are some special requirements, however. Since concurrency handling in sagas is a very delicate procedure, the repository must ensure that for each conceptual saga instance (with an equal identifier) only a single instance exists in the JVM.
 
 Axon provides the `AnnotatedSagaRepository` implementation, which allows the lookup of saga instances while guaranteeing that only a single instance of the saga may be accessed at the same time. It uses a `SagaStore` to perform the actual persistence of saga instances.
 
@@ -72,7 +72,7 @@ In some cases, applications benefit from caching saga instances. In that case, t
 
 #### JpaSagaStore
 
-The `JpaSagaStore` uses JPA to store the state and association values of sagas. Sagas themselves do not need any JPA annotations; Axon will serialize the sagas using a `Serializer` \(similar to event serialization, you can choose between an `XStreamSerializer` or `JacksonSerializer`, which can be set by configuring the default `Serializer` in your application. For more details, see [Serializers](../serialization.md).
+The `JpaSagaStore` uses JPA to store the state and association values of sagas. Sagas themselves do not need any JPA annotations; Axon will serialize the sagas using a `Serializer` (similar to event serialization, you can choose between an `XStreamSerializer` or `JacksonSerializer`, which can be set by configuring the default `Serializer` in your application. For more details, see [Serializers](../serialization.md).
 
 The `JpaSagaStore` is configured with an `EntityManagerProvider`, which provides access to an `EntityManager` instance to use. This abstraction allows for the use of both application managed and container managed `EntityManager`s. Optionally, you can define the serializer to serialize the Saga instances with. Axon defaults to the `XStreamSerializer`.
 
@@ -104,22 +104,17 @@ The latter two arguments may refer to the same cache, or to different ones. This
 
 ## Configuring a Saga
 
-Although a Saga requires a [manager](#saga-manager), [repository / store](#saga-repository-and-saga-store) and wiring to the right message busses, configuring a Saga is straightforward.
-When using the Configuration API, Axon will use sensible defaults for most components.
+Although a Saga requires a [manager](implementation.md#saga-manager), [repository / store](implementation.md#saga-repository-and-saga-store) and wiring to the right message busses, configuring a Saga is straightforward. When using the Configuration API, Axon will use sensible defaults for most components.
 
-As a specific type of [Event Handling Component](../events/event-handlers.md), configuration of a Saga is closely related to the configuration of [Event Processors](../events/event-processors/README.md).
-Due to this, configuring a processor will impact the behaviour of a Saga, albeit on a non-functional level.
-The configuration of [error handling](../events/event-processors/README.md#error-handling) or [processor assignment rules](../events/event-processors/README.md#assigning-handlers-to-processors), for example, are thus equally valid for Sagas as long as the right processor name is used during configuration.
+As a specific type of [Event Handling Component](../events/event-handlers.md), configuration of a Saga is closely related to the configuration of [Event Processors](../events/event-processors/). Due to this, configuring a processor will impact the behaviour of a Saga, albeit on a non-functional level. The configuration of [error handling](../events/event-processors/#error-handling) or [processor assignment rules](../events/event-processors/#assigning-handlers-to-processors), for example, are thus equally valid for Sagas as long as the right processor name is used during configuration.
 
 > **Default Saga Processor name**
-> 
-> As a Saga is a type of event handler, it is part of an Event Processor.
-> Without defining any [assignment rules](../events/event-processors/README.md#assigning-handlers-to-processors), a Saga's processor name equals the Saga name appended with "Processor",
+>
+> As a Saga is a type of event handler, it is part of an Event Processor. Without defining any [assignment rules](../events/event-processors/#assigning-handlers-to-processors), a Saga's processor name equals the Saga name appended with "Processor",
 >
 > With a Saga called `MySaga`, that would mean the processor is called `MySagaProcessor`.
 
-Internally, Axon uses a `SagaConfigurer` to construct the Saga, Saga Manager, Saga Repository and Saga Store.
-A default configuration for a Saga called `MySaga` would look as follows:
+Internally, Axon uses a `SagaConfigurer` to construct the Saga, Saga Manager, Saga Repository and Saga Store. A default configuration for a Saga called `MySaga` would look as follows:
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -149,10 +144,7 @@ class MySaga {
 {% endtab %}
 {% endtabs %}
 
-Although the defaults lead us to a working Saga environment, it is recommended to define the [`SagaStore`](#saga-repository-and-saga-store) to use.
-The `SagaStore` represents the mechanism that 'physically' stores the Saga instances, for which it uses the `AnnotatedSagaRepository` \(the default\) to store and retrieve Saga instances.
-If no `SagaStore` is configured Axon defaults an `InMemorySagaStore`, thus not persisting the Saga on shutdown.
-To configure a `SagaStore` for `MySaga` consider the following snippet:
+Although the defaults lead us to a working Saga environment, it is recommended to define the [`SagaStore`](implementation.md#saga-repository-and-saga-store) to use. The `SagaStore` represents the mechanism that 'physically' stores the Saga instances, for which it uses the `AnnotatedSagaRepository` (the default) to store and retrieve Saga instances. If no `SagaStore` is configured Axon defaults an `InMemorySagaStore`, thus not persisting the Saga on shutdown. To configure a `SagaStore` for `MySaga` consider the following snippet:
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -174,12 +166,12 @@ class AxonConfig {
     }
 }
 ```
+
 Alternatively, a default store can be defined through `EventProcessingConfigurer#registerSagaStore(Function<Configuration, SagaStore>)` method.
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-When Spring Boot is used and JPA or JDBC is on the classpath, then Axon auto-configures a `JpaSagaStore` or `JdbcSagaStore` respectively.
-To provide a custom `SagaStore`, providing a bean to the application context and defining the bean name on the `@Saga` annotation suffices: 
+When Spring Boot is used and JPA or JDBC is on the classpath, then Axon auto-configures a `JpaSagaStore` or `JdbcSagaStore` respectively. To provide a custom `SagaStore`, providing a bean to the application context and defining the bean name on the `@Saga` annotation suffices:
 
 ```java
 import org.axonframework.spring.stereotype.Saga;

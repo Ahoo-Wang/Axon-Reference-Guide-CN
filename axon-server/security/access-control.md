@@ -1,10 +1,14 @@
-# Access Control
+---
+description: Access Control
+---
 
-As Axon Server is an event store and may contain sensitive data it is always a good practice to enable access control in production and production-like environments. Enabling access control will require applications to provide a token when accessing Axon Server services \(both through gRPC and HTTP\), and require users to login to the dashboard.‌ In this section we will describe how to configure access control on both the Axon Server side as well as the Axon Framework side.
+# 访问控制
 
-To enable access control in Axon Server \(SE/EE\) add the following property to `axonserver.properties`:
+As Axon Server is an event store and may contain sensitive data it is always a good practice to enable access control in production and production-like environments. Enabling access control will require applications to provide a token when accessing Axon Server services (both through gRPC and HTTP), and require users to login to the dashboard.‌ In this section we will describe how to configure access control on both the Axon Server side as well as the Axon Framework side.
 
-```text
+To enable access control in Axon Server (SE/EE) add the following property to `axonserver.properties`:
+
+```
 axoniq.axonserver.accesscontrol.enabled=true
 ```
 
@@ -25,7 +29,7 @@ For Axon Server EE, we have additional sections on the external authentication e
 
 If you haven't used the cluster template to create an initial user, you can use the CLI to create it. For this you will need an admin-level access token, as described [here](access-control-cli.md). To do this execute the "`register-user`" command:
 
-```text
+```
 $ java -jar axonserver-cli.jar register-user
 usage: register-user
  -i,--insecure-ssl         Do not check the certificate when connecting
@@ -47,7 +51,7 @@ usage: register-user
 ### Mandatory parameters
 
 * `-u` or `--username` specifies the username.
-* `-r` or `--roles` specifies the role of the user. Specify multiple roles by giving a comma separated list \(without spaces\), for example "`READ,ADMIN`". 
+* `-r` or `--roles` specifies the role of the user. Specify multiple roles by giving a comma separated list (without spaces), for example "`READ,ADMIN`".
 
 ### Optional parameters
 

@@ -1,4 +1,8 @@
-# Message Intercepting
+---
+description: Message Intercepting
+---
+
+# 消息拦截
 
 There are two different types of interceptors: dispatch interceptors and handler interceptors. Dispatch interceptors are invoked before a message is dispatched to a message handler. At that point, it may not even be known that a handler exists for that message. Handler interceptors are invoked just before the message handler is invoked.
 
@@ -44,7 +48,7 @@ public class CommandBusConfiguration {
 
 There is no point in processing a command if it does not contain all required information in the correct format. In fact, a command that lacks information should be blocked as early as possible, preferably even before a transaction has been started. Therefore, an interceptor should check all incoming commands for the availability of such information. This is called structural validation.
 
-Axon Framework has support for JSR 303 Bean Validation based validation. This allows you to annotate the fields on commands with annotations like `@NotEmpty` and `@Pattern`. You need to include a JSR 303 implementation \(such as Hibernate-Validator\) on your classpath. Then, configure a `BeanValidationInterceptor` on your command bus, and it will automatically find and configure your validator implementation. While it uses sensible defaults, you can fine-tune it to your specific needs.
+Axon Framework has support for JSR 303 Bean Validation based validation. This allows you to annotate the fields on commands with annotations like `@NotEmpty` and `@Pattern`. You need to include a JSR 303 implementation (such as Hibernate-Validator) on your classpath. Then, configure a `BeanValidationInterceptor` on your command bus, and it will automatically find and configure your validator implementation. While it uses sensible defaults, you can fine-tune it to your specific needs.
 
 > **Interceptor Ordering Tip**
 >
@@ -56,11 +60,11 @@ The `BeanValidationInterceptor` also implements `MessageHandlerInterceptor`, all
 
 Message handler interceptors can take action both before and after command processing. Interceptors can even block command processing altogether, for example for security reasons.
 
-Interceptors must implement the `MessageHandlerInterceptor` interface. This interface declares one method, `handle`, that takes two parameters: the current `UnitOfWork` and an `InterceptorChain`. The `InterceptorChain` is used to continue the dispatching process. The `UnitOfWork` gives you \(1\) the message being handled and \(2\) provides the possibility to tie in logic prior, during or after \(command\) message handling \(see [Unit Of Work](unit-of-work.md) for more information about the phases\).
+Interceptors must implement the `MessageHandlerInterceptor` interface. This interface declares one method, `handle`, that takes two parameters: the current `UnitOfWork` and an `InterceptorChain`. The `InterceptorChain` is used to continue the dispatching process. The `UnitOfWork` gives you (1) the message being handled and (2) provides the possibility to tie in logic prior, during or after (command) message handling (see [Unit Of Work](unit-of-work.md) for more information about the phases).
 
 Unlike dispatch interceptors, handler interceptors are invoked in the context of the command handler. That means they can attach correlation data based on the message being handled to the unit of work, for example. This correlation data will then be attached to messages being created in the context of that unit of work.
 
-Handler interceptors are also typically used to manage transactions around the handling of a command. To do so, register a `TransactionManagingInterceptor`, which in turn is configured with a `TransactionManager` to start and commit \(or roll back\) the actual transaction.
+Handler interceptors are also typically used to manage transactions around the handling of a command. To do so, register a `TransactionManagingInterceptor`, which in turn is configured with a `TransactionManager` to start and commit (or roll back) the actual transaction.
 
 Let's create a Message Handler Interceptor which will only allow the handling of commands that contain `axonUser` as a value for the `userId` field in the `MetaData`. If the `userId` is not present in the metadata, an exception will be thrown which will prevent the command from being handled. Additionally, if the value of `userId` does not match `axonUser`, we will also not proceed up the chain.
 
@@ -97,9 +101,7 @@ public class CommandBusConfiguration {
 
 #### `@CommandHandlerInterceptor` Annotation
 
-The framework has the ability to add a Handler Interceptor as a `@CommandHandlerInterceptor` annotated method on the Aggregate/Entity.
-The difference between a method on an Aggregate and a "[regular](message-intercepting.md#command-handler-interceptors)" Command Handler Interceptor, is that with the annotation approach you can make decisions based on the current state of the given Aggregate.
-Some properties of an annotated Command Handler Interceptor are:
+The framework has the ability to add a Handler Interceptor as a `@CommandHandlerInterceptor` annotated method on the Aggregate/Entity. The difference between a method on an Aggregate and a "[regular](message-intercepting.md#command-handler-interceptors)" Command Handler Interceptor, is that with the annotation approach you can make decisions based on the current state of the given Aggregate. Some properties of an annotated Command Handler Interceptor are:
 
 * The annotation can be put on entities within the Aggregate.
 * It is possible to intercept a command on Aggregate Root level, whilst the command handler is in a child entity.
@@ -124,7 +126,7 @@ public class GiftCard {
 }
 ```
 
-Note that the `@CommandHandlerInterceptor` is essentially a more specific implementation of the `@MessageHandlerInterceptor` described [here](#messagehandlerinterceptor).
+Note that the `@CommandHandlerInterceptor` is essentially a more specific implementation of the `@MessageHandlerInterceptor` described [here](message-intercepting.md#messagehandlerinterceptor).
 
 ## Event Interceptors
 
@@ -174,7 +176,7 @@ public class EventBusConfiguration {
 
 Message handler interceptors can take action both before and after event processing. Interceptors can even block event processing altogether, for example for security reasons.
 
-Interceptors must implement the `MessageHandlerInterceptor` interface. This interface declares one method, `handle()`, that takes two parameters: the current `UnitOfWork` and an `InterceptorChain`. The `InterceptorChain` is used to continue the dispatching process. The `UnitOfWork` gives you \(1\) the message being handled and \(2\) provides the possibility to tie in logic prior, during or after \(event\) message handling \(see [Unit Of Work](unit-of-work.md) for more information about the phases\).
+Interceptors must implement the `MessageHandlerInterceptor` interface. This interface declares one method, `handle()`, that takes two parameters: the current `UnitOfWork` and an `InterceptorChain`. The `InterceptorChain` is used to continue the dispatching process. The `UnitOfWork` gives you (1) the message being handled and (2) provides the possibility to tie in logic prior, during or after (event) message handling (see [Unit Of Work](unit-of-work.md) for more information about the phases).
 
 Unlike dispatch interceptors, handler interceptors are invoked in the context of the event handler. That means they can attach correlation data based on the message being handled to the unit of work, for example. This correlation data will then be attached to event messages being created in the context of that unit of work.
 
@@ -229,7 +231,7 @@ Message dispatch interceptors are invoked when a query is dispatched on a query 
 
 There is no point in processing a query if it does not contain all required information in the correct format. In fact, a query that lacks information should be blocked as early as possible. Therefore, an interceptor should check all incoming queries for the availability of such information. This is called structural validation.
 
-Axon Framework has support for JSR 303 Bean Validation based validation. This allows you to annotate the fields on queries with annotations like `@NotEmpty` and `@Pattern`. You need to include a JSR 303 implementation \(such as Hibernate-Validator\) on your classpath. Then, configure a `BeanValidationInterceptor` on your query bus, and it will automatically find and configure your validator implementation. While it uses sensible defaults, you can fine-tune it to your specific needs.
+Axon Framework has support for JSR 303 Bean Validation based validation. This allows you to annotate the fields on queries with annotations like `@NotEmpty` and `@Pattern`. You need to include a JSR 303 implementation (such as Hibernate-Validator) on your classpath. Then, configure a `BeanValidationInterceptor` on your query bus, and it will automatically find and configure your validator implementation. While it uses sensible defaults, you can fine-tune it to your specific needs.
 
 > **Interceptor Ordering Tip**
 >
@@ -241,21 +243,19 @@ The `BeanValidationInterceptor` also implements `MessageHandlerInterceptor`, all
 
 Message handler interceptors can take action both before and after query processing. Interceptors can even block query processing altogether, for example for security reasons.
 
-Interceptors must implement the `MessageHandlerInterceptor` interface. This interface declares one method, `handle`, that takes two parameters: the current `UnitOfWork` and an `InterceptorChain`. The `InterceptorChain` is used to continue the dispatching process. The `UnitOfWork` gives you \(1\) the message being handled and \(2\) provides the possibility to tie in logic prior, during or after \(query\) message handling \(see[ Unit Of Work ](unit-of-work.md)for more information about the phases\).
+Interceptors must implement the `MessageHandlerInterceptor` interface. This interface declares one method, `handle`, that takes two parameters: the current `UnitOfWork` and an `InterceptorChain`. The `InterceptorChain` is used to continue the dispatching process. The `UnitOfWork` gives you (1) the message being handled and (2) provides the possibility to tie in logic prior, during or after (query) message handling (see[ Unit Of Work ](unit-of-work.md)for more information about the phases).
 
 Unlike dispatch interceptors, handler interceptors are invoked in the context of the query handler. That means they can attach correlation data based on the message being handled to the unit of work, for example. This correlation data will then be attached to messages being created in the context of that unit of work.
 
 ## @MessageHandlerInterceptor
 
-Alongside defining overall `MessageHandlerInterceptor` instances on the component handling a message (e.g. a command, query or event), it is also possible to define a handler interceptor for a specific component containing the handlers.
-This can be achieved by adding a method handling the message, combined with the `@MessageHandlerInterceptor` annotation.
-Adding such a method allows you more fine-grained control over which message handling components should react and how these should react.
+Alongside defining overall `MessageHandlerInterceptor` instances on the component handling a message (e.g. a command, query or event), it is also possible to define a handler interceptor for a specific component containing the handlers. This can be achieved by adding a method handling the message, combined with the `@MessageHandlerInterceptor` annotation. Adding such a method allows you more fine-grained control over which message handling components should react and how these should react.
 
 Several handles are given to you when it comes to adding the `@MessageHandlerInterceptor`, like:
 
 1. `MessageHandlerInterceptor` instances work with the `InterceptorChain` to decide when to proceed with other interceptors in the chain. The `InterceptorChain` is an _optional_ parameter which can be added to the intercepting method to provide you with the same control. In absence of this parameter, the framework will call `InterceptorChain#proceed` once the method is exited.
 2. You can define the type of `Message` the interceptor should deal with. By default, it reacts to any `Message` implementation. If an `EventMessage` specific interceptor is desired, the `messageType` parameter on the annotation should be set to `EventMessage.class`.
-3. For even more fine-grained control of which messages should react to the interceptor, the `payloadType` contained in the `Message` to handle can be specified.    
+3. For even more fine-grained control of which messages should react to the interceptor, the `payloadType` contained in the `Message` to handle can be specified.
 
 The following snippets shows some possible approaches of using the `@MessageHandlerInterceptor` annotation:
 
@@ -286,9 +286,7 @@ public class CardSummaryProjection {
     }
 }
 ```
-{% tab title="@MessageHandlerInterceptor method defining the Message and payload type" %}
 
-{% endtab %}
 ```java
 public class CardSummaryProjection {
     /*
@@ -323,26 +321,17 @@ public class CardSummaryProjection {
 {% endtab %}
 {% endtabs %}
 
-Next to the message, payload and `InterceptorChain`, a `@MessageHandlerInterceptor` annotated method can resolve other parameters as well.
-Which parameters the framework can resolve on such a function, is based on the type of `Message` being handled by the interceptor.
-For more specifics on which parameters are resolvable for the `Message` being handled, take a look at [this](supported-parameters-annotated-handlers.md) page.  
+Next to the message, payload and `InterceptorChain`, a `@MessageHandlerInterceptor` annotated method can resolve other parameters as well. Which parameters the framework can resolve on such a function, is based on the type of `Message` being handled by the interceptor. For more specifics on which parameters are resolvable for the `Message` being handled, take a look at [this](supported-parameters-annotated-handlers.md) page.
 
 ### @ExceptionHandler
 
-The `@MessageHandlerInterceptor` also allows for a more specific version of an intercepting function.
-Namely, an `@ExceptionHandler` annotated method.
+The `@MessageHandlerInterceptor` also allows for a more specific version of an intercepting function. Namely, an `@ExceptionHandler` annotated method.
 
-The framework invokes `@ExceptionHandler` annotated methods _only_ for exceptional results of message handling.
-Using exception handlers like this, for example, allows you to throw more domain-specific exceptions as a result of a thrown database/service exception.
-Or, you can catch an aggregate-specific exception and translate it to a generic error code.
+The framework invokes `@ExceptionHandler` annotated methods _only_ for exceptional results of message handling. Using exception handlers like this, for example, allows you to throw more domain-specific exceptions as a result of a thrown database/service exception. Or, you can catch an aggregate-specific exception and translate it to a generic error code.
 
-To Axon, an exception handler is just like any other message handling method.
-You can thus wire all [default parameters](supported-parameters-annotated-handlers.md) to an exception handler, similar to command, event, and query handlers.
-Hence, you can add the exception, payload, `MetaData`, and other options to the `@ExceptionHandler` annotated function.
+To Axon, an exception handler is just like any other message handling method. You can thus wire all [default parameters](supported-parameters-annotated-handlers.md) to an exception handler, similar to command, event, and query handlers. Hence, you can add the exception, payload, `MetaData`, and other options to the `@ExceptionHandler` annotated function.
 
-You can introduce `@ExceptionHandler` annotated methods in any message handling component.
-Furthermore, you can choose to react to all exceptions or define specific exception/message combinations to which the handler should respond.
-Check the following samples for some snippets on how to use this:
+You can introduce `@ExceptionHandler` annotated methods in any message handling component. Furthermore, you can choose to react to all exceptions or define specific exception/message combinations to which the handler should respond. Check the following samples for some snippets on how to use this:
 
 {% tabs %}
 {% tab title="Aggregate Exception Handlers" %}
@@ -389,6 +378,7 @@ class GiftCard {
 }
 ```
 {% endtab %}
+
 {% tab title="Projector Exception Handlers" %}
 ```java
 class CardSummaryProjection {
@@ -436,8 +426,7 @@ class CardSummaryProjection {
 {% endtabs %}
 
 > **Exception Handling for Aggregate Constructors**
-> 
-> The `@ExceptionHandler` annotated methods require an existing component instance to work.
-> Because of this, exception handlers **do not** work for (command handling) constructors of an aggregate.
-> 
+>
+> The `@ExceptionHandler` annotated methods require an existing component instance to work. Because of this, exception handlers **do not** work for (command handling) constructors of an aggregate.
+>
 > If you thus expect exceptions on an aggregate's command handler that you need to handle differently, it is recommended to use Axon's [creation policy](../axon-framework-commands/command-handlers.md#aggregate-command-handler-creation-policy).

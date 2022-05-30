@@ -1,4 +1,8 @@
-# Multi-Entity Aggregates
+---
+description: Multi-Entity Aggregates
+---
+
+# 多实体聚合
 
 Complex business logic often requires more than what an Aggregate with only an Aggregate Root can provide. In that case, it is important that the complexity is spread over a number of 'Entities' within the aggregate. In this chapter we will discuss the specifics around creating entities in your aggregates and how they can handle message.
 
@@ -49,25 +53,14 @@ public class GiftCardTransaction {
 
 Entities are, just like the aggregate root, simple objects, as is shown with the new `GiftCardTransaction` entity. The snippet above shows two important concepts of multi-entity aggregates:
 
-1. The field that declares the child entity/entities must be annotated with `@AggregateMember`.
-   This annotation tells Axon that the annotated field contains a class that should be inspected for message handlers.
-   This example shows the annotation on an implementation of `Iterable`, but it can also be placed on a single Object or a `Map`.
-   In the latter case, the values of the `Map` are expected to contain the entities, while the key contains a value that is used as their reference.
-   Note that this annotation can be placed on a field and a method.
-
-2. The `@EntityId` annotation specifying the identifying field of an Entity.
-   Required to be able to route a command \(or [event](multi-entity-aggregates.md#event-sourcing-handlers-in-entities)\) message to the correct entity instance.
-   The property on the payload that will be used to find the entity that the message should be routed to, defaults to the name of the `@EntityId` annotated field.
-   For example, when annotating the field `transactionId`, the command must define a property with that same name, which means either a `transactionId` or a `getTransactionId()` method must be present.
-   If the name of the field and the routing property differ, you may provide a value explicitly using `@EntityId(routingKey = "customRoutingProperty")`.
-   This annotation is **mandatory** on the Entity implementation if it will be part of a `Collection` or `Map` of child entities.
-   Note that this annotation can be placed on a field and a method.
+1. The field that declares the child entity/entities must be annotated with `@AggregateMember`. This annotation tells Axon that the annotated field contains a class that should be inspected for message handlers. This example shows the annotation on an implementation of `Iterable`, but it can also be placed on a single Object or a `Map`. In the latter case, the values of the `Map` are expected to contain the entities, while the key contains a value that is used as their reference. Note that this annotation can be placed on a field and a method.
+2. The `@EntityId` annotation specifying the identifying field of an Entity. Required to be able to route a command (or [event](multi-entity-aggregates.md#event-sourcing-handlers-in-entities)) message to the correct entity instance. The property on the payload that will be used to find the entity that the message should be routed to, defaults to the name of the `@EntityId` annotated field. For example, when annotating the field `transactionId`, the command must define a property with that same name, which means either a `transactionId` or a `getTransactionId()` method must be present. If the name of the field and the routing property differ, you may provide a value explicitly using `@EntityId(routingKey = "customRoutingProperty")`. This annotation is **mandatory** on the Entity implementation if it will be part of a `Collection` or `Map` of child entities. Note that this annotation can be placed on a field and a method.
 
 > **Defining the Entity type**
 >
-> The field declaration for both the `Collection` or `Map` should contain proper generics to allow Axon to identify the type of Entity contained in the collection or map. If it is not possible to add the generics in the declaration \(e.g. because you're using a custom implementation which already defines generic types\), you must specify the entity type by specifying the `type` field in the `@AggregateMember` annotation:
+> The field declaration for both the `Collection` or `Map` should contain proper generics to allow Axon to identify the type of Entity contained in the collection or map. If it is not possible to add the generics in the declaration (e.g. because you're using a custom implementation which already defines generic types), you must specify the entity type by specifying the `type` field in the `@AggregateMember` annotation:
 >
-> &gt;`@AggregateMember(type = GiftCardTransaction.class)`.
+> \>`@AggregateMember(type = GiftCardTransaction.class)`.
 
 ## Command Handling in Entities
 
@@ -124,7 +117,7 @@ Note that only the declared type of the annotated field is inspected for command
 
 > **Command Handler considerations**
 >
-> Note that each command must have exactly one handler in the aggregate. This means that you cannot annotate multiple entities \(either root nor not\) with `@CommandHandler` which handle the same command type. In case you need to conditionally route a command to an entity, the parent of these entities should handle the command, and forward it based on the conditions that apply.
+> Note that each command must have exactly one handler in the aggregate. This means that you cannot annotate multiple entities (either root nor not) with `@CommandHandler` which handle the same command type. In case you need to conditionally route a command to an entity, the parent of these entities should handle the command, and forward it based on the conditions that apply.
 >
 > The runtime type of the field does not have to be exactly the declared type. However, only the declared type of the `@AggregateMember` annotated field is inspected for `@CommandHandler` methods.
 
@@ -132,7 +125,7 @@ Note that only the declared type of the annotated field is inspected for command
 
 When using event sourcing as the mechanism to store the aggregates, not only the aggregate root needs to use events to trigger state transitions, but so does each of the entities within that aggregate. Axon provides support for event sourcing complex aggregate structures like these out of the box.
 
-When an entity \(including the aggregate root\) applies an event, it is handled by the aggregate root first, and then bubbles down through every `@AggregateMember` annotated field to **all** its containing child entities:
+When an entity (including the aggregate root) applies an event, it is handled by the aggregate root first, and then bubbles down through every `@AggregateMember` annotated field to **all** its containing child entities:
 
 ```java
 import org.axonframework.commandhandling.CommandHandler;
@@ -199,13 +192,12 @@ public class GiftCardTransaction {
 
 Two specifics are worth mentioning from the above snippet, pointed out with numbered Java comments:
 
-1. The creation of the Entity takes place in an event sourcing handler of it's parent.
+1.  The creation of the Entity takes place in an event sourcing handler of it's parent.
 
-   It is thus not possible to have a 'command handling constructor' on the entity class as with the aggregate root.
+    It is thus not possible to have a 'command handling constructor' on the entity class as with the aggregate root.
+2.  The event sourcing handler in the entity performs a validation check whether the received event actually belongs to the entity.
 
-2. The event sourcing handler in the entity performs a validation check whether the received event actually belongs to the entity.
-
-   This is necessary as events applied by one entity instance will also be handled by any other entity instance of the same type.
+    This is necessary as events applied by one entity instance will also be handled by any other entity instance of the same type.
 
 The situation described in bullet point two is customizable, by changing the `eventForwardingMode` on the `@AggregateMember` annotation:
 
@@ -225,5 +217,4 @@ public class GiftCard {
 }
 ```
 
-By setting the `eventForwardingMode` to `ForwardMatchingInstances` an Event Message will only be forwarded if it contains a field/getter which matches the name of the `@EntityId` annotated field on the entity. This routing behaviour can be further specified with the `routingKey` field on the `@EntityId` annotation, mirroring that of [routing commands in entities](multi-entity-aggregates.md#command-handling-in-entities). Other forwarding modes which can be used are `ForwardAll` \(the default\) and `ForwardNone`, which respectively forward all events to all entities or no events at all.
-
+By setting the `eventForwardingMode` to `ForwardMatchingInstances` an Event Message will only be forwarded if it contains a field/getter which matches the name of the `@EntityId` annotated field on the entity. This routing behaviour can be further specified with the `routingKey` field on the `@EntityId` annotation, mirroring that of [routing commands in entities](multi-entity-aggregates.md#command-handling-in-entities). Other forwarding modes which can be used are `ForwardAll` (the default) and `ForwardNone`, which respectively forward all events to all entities or no events at all.
