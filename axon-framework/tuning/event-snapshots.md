@@ -1,4 +1,8 @@
-# Event Snapshots
+---
+description: Event Snapshots
+---
+
+# 事件快照
 
 ## Snapshotting
 
@@ -25,8 +29,7 @@ Axon provides the `AggregateSnapshotter`, which creates and stores `AggregateSna
 
 > **Serializing a Snapshot Event**
 >
-> Do make sure the `Serializer` instance you use \(which defaults to the `XStreamSerializer`\) is capable of serializing your aggregate. 
-> The `XStreamSerializer` requires you to use either a Hotspot JVM, or your aggregate must either have an accessible default constructor or implement the `Serializable` interface.
+> Do make sure the `Serializer` instance you use (which defaults to the `XStreamSerializer`) is capable of serializing your aggregate. The `XStreamSerializer` requires you to use either a Hotspot JVM, or your aggregate must either have an accessible default constructor or implement the `Serializable` interface.
 
 The `AbstractSnapshotter` provides a basic set of properties that allow you to tweak the way snapshots are created:
 
@@ -35,22 +38,16 @@ The `AbstractSnapshotter` provides a basic set of properties that allow you to t
 
 The `AggregateSnapshotter` provides one more property:
 
-* `AggregateFactories` is the property that allows you to set the factories that will create instances of your aggregates. 
-  Configuring multiple aggregate factories allows you to use a single `Snapshotter` to create snapshots for a variety of aggregate types. 
-  The `EventSourcingRepository` implementations and the `AggregateConfiguration` provide access to the `AggregateFactory` being used for a given Aggregate.
-  Both provide the factory through the `EventSourcingRepository#getAggregateFactory` and `AggregateConfiguration#aggregateFactory` methods respectively.   
+* `AggregateFactories` is the property that allows you to set the factories that will create instances of your aggregates. Configuring multiple aggregate factories allows you to use a single `Snapshotter` to create snapshots for a variety of aggregate types. The `EventSourcingRepository` implementations and the `AggregateConfiguration` provide access to the `AggregateFactory` being used for a given Aggregate. Both provide the factory through the `EventSourcingRepository#getAggregateFactory` and `AggregateConfiguration#aggregateFactory` methods respectively.\
   The result from either can be used to configure the same aggregate factories in the `Snapshotter` as the ones used by the Aggregate.
 
 > **Snapshotter Configuration**
 >
 > If you use an executor that executes snapshot creation in another thread, make sure you configure the correct transaction management for your underlying event store, if necessary.
 >
-> For both non-Spring and Spring users a default `Snapshotter` is provided.
-> The former uses the Configuration API to provide a default `AggregateSnapshotter`, retrieving the aggregate factories from the registered Aggregates / `AggregateConfiguration`s.
-> Spring uses a `SpringAggregateSnapshotter`, which will automatically looks up the right `AggregateFactory` instances from the application context when a snapshot needs to be created.
+> For both non-Spring and Spring users a default `Snapshotter` is provided. The former uses the Configuration API to provide a default `AggregateSnapshotter`, retrieving the aggregate factories from the registered Aggregates / `AggregateConfiguration`s. Spring uses a `SpringAggregateSnapshotter`, which will automatically looks up the right `AggregateFactory` instances from the application context when a snapshot needs to be created.
 >
-> The `@Revision` annotation has a dedicated, automatically configured `SnapshotFilter` implementation. This implementation is used to filter out non-matching snapshots from the `Repository`'s loading process. 
-> So when the `@Revision` annotation is used on an aggregate the snapshots will be filtered out automatically. 
+> The `@Revision` annotation has a dedicated, automatically configured `SnapshotFilter` implementation. This implementation is used to filter out non-matching snapshots from the `Repository`'s loading process. So when the `@Revision` annotation is used on an aggregate the snapshots will be filtered out automatically.
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -66,12 +63,9 @@ Configurer configurer = DefaultConfigurer.defaultConfiguration()
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-It is possible to define a custom `SnapshotTriggerDefinition` for an aggregate as a Spring bean. 
-In order to tie the `SnapshotTriggerDefinition` bean to an aggregate, use the `snapshotTriggerDefinition` attribute on `@Aggregate` annotation. 
-Listing below shows how to define a custom `EventCountSnapshotTriggerDefinition` which will take a snapshot every 500 events.
+It is possible to define a custom `SnapshotTriggerDefinition` for an aggregate as a Spring bean. In order to tie the `SnapshotTriggerDefinition` bean to an aggregate, use the `snapshotTriggerDefinition` attribute on `@Aggregate` annotation. Listing below shows how to define a custom `EventCountSnapshotTriggerDefinition` which will take a snapshot every 500 events.
 
-Note that a `Snapshotter` instance, if not explicitly defined as a bean already, will be automatically configured for you. 
-This means you can simply pass the `Snapshotter` as a parameter to your `SnapshotTriggerDefinition`.
+Note that a `Snapshotter` instance, if not explicitly defined as a bean already, will be automatically configured for you. This means you can simply pass the `Snapshotter` as a parameter to your `SnapshotTriggerDefinition`.
 
 ```java
 @Bean
@@ -93,27 +87,19 @@ When a snapshot is stored in the event store, it will automatically use that sna
 
 > **Snapshots as a replacement of your events?**
 >
-> Normally, you can archive all events once they are part of a snapshot event. 
-> Snapshotted events will never be read in again by the event store in regular operational scenarios. 
-> However, if you want to be able to reconstruct an aggregate state prior to the moment the snapshot was created, you must keep the events up to that date.
+> Normally, you can archive all events once they are part of a snapshot event. Snapshotted events will never be read in again by the event store in regular operational scenarios. However, if you want to be able to reconstruct an aggregate state prior to the moment the snapshot was created, you must keep the events up to that date.
 
 Axon provides a special type of snapshot event: the `AggregateSnapshot`, which stores an entire aggregate as a snapshot. The motivation is simple: your aggregate should only contain the state relevant to take business decisions. This is exactly the information you want captured in a snapshot. All event sourcing repositories provided by Axon recognize the `AggregateSnapshot`, and will extract the aggregate from it. Beware that using this snapshot event requires that the event serialization mechanism needs to be able to serialize the aggregate.
 
 ### Filtering Snapshot Events
 
-When enabling snapshotting, several snapshots would be stored per Aggregate instance in the event store.
-At a certain stage, some of these snapshot events are no longer being used by the application as newer versions took their place.
-Especially if these snapshot events portray an old format of the aggregate by using the `AggregateSnapshot` event would it be smart to no longer load these.
+When enabling snapshotting, several snapshots would be stored per Aggregate instance in the event store. At a certain stage, some of these snapshot events are no longer being used by the application as newer versions took their place. Especially if these snapshot events portray an old format of the aggregate by using the `AggregateSnapshot` event would it be smart to no longer load these.
 
-You could take the stance of dropping all the snapshots which are stored (for a given aggregate type), but this means snapshots will be recreated with a 100% certainty.
-It is also possible to filter out snapshot events when reading your Aggregate from the event store.
-To that end, a `SnapshotFilter` can be defined per Aggregate type or for the entire `EventStore`.
+You could take the stance of dropping all the snapshots which are stored (for a given aggregate type), but this means snapshots will be recreated with a 100% certainty. It is also possible to filter out snapshot events when reading your Aggregate from the event store. To that end, a `SnapshotFilter` can be defined per Aggregate type or for the entire `EventStore`.
 
-The `SnapshotFilter` is a functional interface, providing two main operations: `allow(DomainEventData<?)` and `combine(SnapshotFilter)`.
-The former provides the `DomainEventData` which reflects the snapshot events. 
-The latter allows combining several `SnapshotFilter`s together.
+The `SnapshotFilter` is a functional interface, providing two main operations: `allow(DomainEventData<?)` and `combine(SnapshotFilter)`. The former provides the `DomainEventData` which reflects the snapshot events. The latter allows combining several `SnapshotFilter`s together.
 
-The following snippets show how to configure a `SnapshotFilter`: 
+The following snippets show how to configure a `SnapshotFilter`:
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -129,8 +115,7 @@ Configurer configurer = DefaultConfigurer.defaultConfiguration()
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-It is possible to define a custom `SnapshotFilter` for an aggregate as a Spring bean. 
-In order to tie the `SnapshotFilter` bean to an aggregate, use the `snapshotFilter` attribute on `@Aggregate` annotation. 
+It is possible to define a custom `SnapshotFilter` for an aggregate as a Spring bean. In order to tie the `SnapshotFilter` bean to an aggregate, use the `snapshotFilter` attribute on `@Aggregate` annotation.
 
 ```java
 @Bean
@@ -148,7 +133,7 @@ public class GiftCard {...}
 
 ### Initializing an Aggregate based on a Snapshot Event
 
-A snapshot event is an event like any other. That means a snapshot event is handled just like any other domain event. When using annotations to demarcate event handlers \(`@EventHandler`\), you can annotate a method that initializes full aggregate state based on a snapshot event. The code sample below shows how snapshot events are treated like any other domain event within the aggregate.
+A snapshot event is an event like any other. That means a snapshot event is handled just like any other domain event. When using annotations to demarcate event handlers (`@EventHandler`), you can annotate a method that initializes full aggregate state based on a snapshot event. The code sample below shows how snapshot events are treated like any other domain event within the aggregate.
 
 ```java
 public class MyAggregate extends AbstractAnnotatedAggregateRoot {
@@ -173,46 +158,21 @@ There is one type of snapshot event that is treated differently: the `AggregateS
 
 ## Caching
 
-A well-designed command handling module should pose no problems when implementing caching.
-Especially when using event sourcing, loading an aggregate from an Event Store can be an expensive operation.
-With a properly configured cache in place, loading an aggregate can be converted into a pure in-memory process.
+A well-designed command handling module should pose no problems when implementing caching. Especially when using event sourcing, loading an aggregate from an Event Store can be an expensive operation. With a properly configured cache in place, loading an aggregate can be converted into a pure in-memory process.
 
-To that end, Axon allows the configuration of a `Cache` object.
-The framework currently provides several implementations to choose from:
+To that end, Axon allows the configuration of a `Cache` object. The framework currently provides several implementations to choose from:
 
 * `WeakReferenceCache` - An in-memory cache solution. In most scenarios, this is a good start.
-* `EhCacheAdapter` -
-  An `AbstractCacheAdapter`, wrapping [EhCache](https://www.ehcache.org/) into a usable solution for Axon.
-* `JCacheAdapter` -
-  An `AbstractCacheAdapter`, wrapping [JCache](https://www.javadoc.io/doc/javax.cache/cache-api/1.0.0/index.html) into a usable solution for Axon.
-* `AbstractCacheAdapter` - Abstract implementation towards supporting Axon's `Cache` API.
-  Helpful in writing an adapter for a cache implementation that Axon does not support out of the box.
+* `EhCacheAdapter` - An `AbstractCacheAdapter`, wrapping [EhCache](https://www.ehcache.org/) into a usable solution for Axon.
+* `JCacheAdapter` - An `AbstractCacheAdapter`, wrapping [JCache](https://www.javadoc.io/doc/javax.cache/cache-api/1.0.0/index.html) into a usable solution for Axon.
+* `AbstractCacheAdapter` - Abstract implementation towards supporting Axon's `Cache` API. Helpful in writing an adapter for a cache implementation that Axon does not support out of the box.
 
-Before configuring a `Cache`, please consider the following guidelines.
-They will help you get the most out of your caching solution:
+Before configuring a `Cache`, please consider the following guidelines. They will help you get the most out of your caching solution:
 
-* **Make sure the unit of work never needs to perform a rollback for functional reasons.**
-  A rollback means that an aggregate has reached an invalid state.
-  Axon will automatically invalidate the cache entries involved.
-  The following request will force the aggregate to be reconstructed from its events.
-  If you use exceptions as a potential \(functional\) return value, you can configure a `RollbackConfiguration` on your command bus.
-  By default, the configuration will roll back the unit of work on unchecked exceptions for command handlers and on all exceptions for event handlers.
-
-* **All commands for a single aggregate must arrive on the machine with the aggregate in its cache.**
-  This requirement means that commands should be consistently routed to the same machine for as long as that machine is "healthy."
-  Routing commands consistently prevents the cache from going stale.
-  A hit on a stale cache will cause a command to be executed and fail when events are stored in the event store.
-  By default, Axon's distributed command bus components will use consistent hashing to route commands.
-
-* **Configure a sensible time to live / time to idle.**
-  By default, caches tend to have a relatively short time to live, a matter of minutes.
-  For a command handling component with consistent routing, a longer time-to-idle and time-to-live is usually better.
-  This setting prevents the need to re-initialize an aggregate based on its events because its cache entry expired.
-  The time-to-live of your cache should match the expected lifetime of your aggregate.
-
-* **Cache data in-memory.**
-  For proper optimization, caches should keep data in-memory \(and preferably on-heap\) for best performance.
-  This approach prevents the need to \(re\)serialize aggregates when storing to disk and even off-heap.
+* **Make sure the unit of work never needs to perform a rollback for functional reasons.** A rollback means that an aggregate has reached an invalid state. Axon will automatically invalidate the cache entries involved. The following request will force the aggregate to be reconstructed from its events. If you use exceptions as a potential (functional) return value, you can configure a `RollbackConfiguration` on your command bus. By default, the configuration will roll back the unit of work on unchecked exceptions for command handlers and on all exceptions for event handlers.
+* **All commands for a single aggregate must arrive on the machine with the aggregate in its cache.** This requirement means that commands should be consistently routed to the same machine for as long as that machine is "healthy." Routing commands consistently prevents the cache from going stale. A hit on a stale cache will cause a command to be executed and fail when events are stored in the event store. By default, Axon's distributed command bus components will use consistent hashing to route commands.
+* **Configure a sensible time to live / time to idle.** By default, caches tend to have a relatively short time to live, a matter of minutes. For a command handling component with consistent routing, a longer time-to-idle and time-to-live is usually better. This setting prevents the need to re-initialize an aggregate based on its events because its cache entry expired. The time-to-live of your cache should match the expected lifetime of your aggregate.
+* **Cache data in-memory.** For proper optimization, caches should keep data in-memory (and preferably on-heap) for best performance. This approach prevents the need to (re)serialize aggregates when storing to disk and even off-heap.
 
 To configure a cache for your Aggregates, consider the following snippet:
 
@@ -234,6 +194,7 @@ public class AxonConfig {
 
 {% tab title="Spring Boot AutoConfiguration" %}
 The `Aggregate` annotation allows specification of the cache bean:
+
 ```java
 @Aggregate(cache = "giftCardCache")
 public class GiftCard {

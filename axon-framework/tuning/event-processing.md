@@ -1,14 +1,18 @@
-# Event Processing
+---
+description: Event Processing
+---
 
-Typically, application components contain one or more[ Event Processors](../events/event-processors/README.md) which are responsible for processing incoming events. Tracking Event Processors have configuration aspects that can be changed at runtime to accommodate for changes in the system topology.
+# 事件处理
 
-## Increasing and decreasing segment counts <a id="increasing-and-decreasing-segment-counts"></a>
+Typically, application components contain one or more[ Event Processors](../events/event-processors/) which are responsible for processing incoming events. Tracking Event Processors have configuration aspects that can be changed at runtime to accommodate for changes in the system topology.
+
+## Increasing and decreasing segment counts <a href="#increasing-and-decreasing-segment-counts" id="increasing-and-decreasing-segment-counts"></a>
 
 Tracking Event Processors that handle events in multiple threads use segments to separate the events in the stream across these threads in a reliable way. However, especially when these threads are spread across multiple instances of a component, and the number of instances changes, it may be useful to scale the number of segments accordingly.
 
 To this end, Axon Framework provides a [split and merge API](../events/event-processors/streaming.md#splitting-and-merging-segments). This API can be utilized directly via a client configuration or through Axon Server, where the latter takes required coordination into account.
 
-### Segment tuning through Axon Framework <a id="segment-tuning-through-axon-framework"></a>
+### Segment tuning through Axon Framework <a href="#segment-tuning-through-axon-framework" id="segment-tuning-through-axon-framework"></a>
 
 The Tracking Event Processors in Axon Framework provide methods to increase or decrease the number of segments for that particular instance. When using this API, one must provide the ID of the segment to increase/decrease. Additionally, the instance on which the method is invoked, must be actively processing that segment.
 
@@ -47,7 +51,7 @@ CompletableFuture<Boolean> futureResult = trackingProcessor.mergeSegment(segment
 >
 > Note that, especially, in such a setup you would need to delegate said split or merge to the correct instance. The "correct instance", in this case, is the instance owning the segment you want to split and merge.
 
-## Blacklisting Events <a id="blacklisting-events"></a>
+## Blacklisting Events <a href="#blacklisting-events" id="blacklisting-events"></a>
 
 In a heterogeneously distributed application landscape your event handling components might receive events they do not have actual event handling members for. That this occurs is completely fine; the chances of a single application handling the entirety of all existing events is very small. This fact however does open up the possibility for optimization by _blacklisting_ events.‌
 
@@ -68,7 +72,7 @@ Configurer configurer =
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-```text
+```
 axon.axonserver.disableEventBlacklisting=true
 ```
 {% endtab %}
@@ -77,4 +81,3 @@ axon.axonserver.disableEventBlacklisting=true
 > **Retrying Blacklisted Events**
 >
 > The topology of Event Handlers might change in the lifecycle of a given application. This thus means that once blacklisted events might at a later stage do have Event Handler members present. To cover this scenario, Axon Server will periodically send over blacklisted events to refresh the blacklisted set.
-

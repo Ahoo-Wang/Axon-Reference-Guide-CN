@@ -1,4 +1,8 @@
-# Handler Enhancers
+---
+description: Handler Enhancers
+---
+
+# 处理程序增强
 
 Handler Enhancers allow you to wrap handlers and add custom logic to the execution, or eligibility of handlers for a certain message. This differs from `HandlerInterceptor`s in that you have access to the aggregate member at the time of resolving, and it allows for more fine-grained control. You can use handler enhancers to intercept and perform checks on groups of `@CommandHandler`s or `@EventHandler`s.
 
@@ -50,7 +54,7 @@ public class ExampleHandlerDefinition implements HandlerEnhancerDefinition {
 4. Handle the method inside of a `MessageHandlingMember`, in this case, indicating the handler is only suitable if the meta-data key matches a value.
 5. If you are not interested in wrapping the handler, just return the original that was passed into the `wrapHandler` method.
 
-It is possible to configure `HandlerDefinition` with Axon `Configuration`. If you are using Spring Boot defining `HandlerDefintion`s and `HandlerEnhancerDefinition`s as beans is sufficient \(Axon autoconfiguration will pick them up and configure within Axon `Configuration`\).
+It is possible to configure `HandlerDefinition` with Axon `Configuration`. If you are using Spring Boot defining `HandlerDefintion`s and `HandlerEnhancerDefinition`s as beans is sufficient (Axon autoconfiguration will pick them up and configure within Axon `Configuration`).
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -85,4 +89,3 @@ public HandlerEnhancerDefinition myCustomHandlerEnhancerDefinition() {
 ```
 {% endtab %}
 {% endtabs %}
-

@@ -1,8 +1,12 @@
-# Command Processing
+---
+description: Command Processing
+---
+
+# 命令处理
 
 This page provides specifics around tuning the command processing within an Axon application.‌
 
-## Duplicate Command Handler Registration <a id="duplicate-command-handler-registration"></a>
+## Duplicate Command Handler Registration <a href="#duplicate-command-handler-registration" id="duplicate-command-handler-registration"></a>
 
 As described in the [Messaging Concepts](../messaging-concepts/) page, a command is always routed to a single destination. This means that during the [registration of a command handler](../axon-framework-commands/configuration.md#registering-a-command-handler) within a given JVM, a second registration of an identical command handler method should be dealt with in a desirable manner.‌
 
@@ -33,4 +37,3 @@ public DuplicateCommandHandlerResolver duplicateCommandHandlerResolver() {
 ```
 {% endtab %}
 {% endtabs %}
-
