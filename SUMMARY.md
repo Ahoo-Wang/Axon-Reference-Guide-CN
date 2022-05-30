@@ -1,4 +1,4 @@
-# Table of Contents
+# Table of contents
 
 * [Introduction](README.md)
 * [Architecture Overview](architecture-overview/README.md)
@@ -66,7 +66,7 @@
   * [Infrastructure](axon-framework/axon-framework-commands/infrastructure.md)
   * [Configuration](axon-framework/axon-framework-commands/configuration.md)
 * [Events](axon-framework/events/README.md)
-  * [Event Dispatchers](axon-framework/events/event-dispatchers.md)
+  * [事件调度器](axon-framework/events/event-dispatchers.md)
   * [Event Handlers](axon-framework/events/event-handlers.md)
   * [Event Processors](axon-framework/events/event-processors/README.md)
     * [Subscribing Event Processors](axon-framework/events/event-processors/subscribing.md)
@@ -125,7 +125,7 @@
   * [Backup and Messaging-only Nodes](axon-server/administration/backup-and-messaging-only-nodes.md)
   * [Backups](axon-server/administration/backups.md)
   * [Recovery](axon-server/administration/recovery.md)
-  * [Plugins](axon-server/administration/plugins.md) 
+  * [Plugins](axon-server/administration/plugins.md)
   * [Error Codes](axon-server/administration/error-codes.md)
 * [Security](axon-server/security/README.md)
   * [SSL](axon-server/security/ssl.md)
