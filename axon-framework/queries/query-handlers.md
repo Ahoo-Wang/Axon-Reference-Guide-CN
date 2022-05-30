@@ -1,4 +1,8 @@
-# Query Handlers
+---
+description: Query Handlers
+---
+
+# 查询处理程序
 
 The handling of a query comes down to an annotated handler returning the query's response. The goal of this chapter is to describe what such an `@QueryHandler` annotated method looks like, as well as describing the call order and response type options. For configuration of query handlers and the `QueryBus`, it is recommended to read the [Configuration](configuration.md) section.
 
@@ -50,7 +54,7 @@ From the above sample we want to highlight two specifics when it comes to writin
 
 In all circumstances, at most one query handler method is invoked per query handling instance. Axon will search for the most specific method to invoke, using following rules:
 
-1. On the actual instance level of the class hierarchy \(as returned by `this.getClass()`\), all annotated methods are evaluated
+1. On the actual instance level of the class hierarchy (as returned by `this.getClass()`), all annotated methods are evaluated
 2. If one or more methods are found of which all parameters can be resolved to a value, the method with the most specific type is chosen and invoked
 3. If no methods are found on this level of the class hierarchy, the super type is evaluated the same way
 4. When the top level of the hierarchy is reached, and no suitable query handler is found, this query handling instance is ignored.
@@ -146,4 +150,3 @@ The following list contains method return values which are not supported when qu
 
 * An array of primitive types
 * A `Map` of a given key and value type
-

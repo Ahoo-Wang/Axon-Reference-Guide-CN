@@ -1,6 +1,10 @@
-# Configuration
+---
+description: Configuration
+---
 
-This page describes the process when it comes to configuring a Query Handlers. Note, that a Query Handler is a \(singleton\) object containing `@QueryHandler` annotated functions.
+# 配置
+
+This page describes the process when it comes to configuring a Query Handlers. Note, that a Query Handler is a (singleton) object containing `@QueryHandler` annotated functions.
 
 ## Registering a Query Handler
 
@@ -8,7 +12,7 @@ When you register a Query Handler, that means you are registering a class contai
 
 1. The first parameter of the method is the _query payload_.
 2. The methods response type is the query's _response type_.
-3. The value of the `queryName` field in the annotation as the query's _name_ \(this is optional and in its absence will default to the query payload\).    
+3. The value of the `queryName` field in the annotation as the query's _name_ (this is optional and in its absence will default to the query payload).
 
 Note that it is possible to register multiple query handlers for the same query payload, response type and name. Furthermore, when dispatching a query the client can indicate whether he/she wants the result from a [single handler ](query-dispatchers.md#point-to-point-queries)or the result from [all handlers](query-dispatchers.md#scatter-gather-queries) corresponding to the query payload, name and response type combination.
 
@@ -70,4 +74,3 @@ public class CardSummaryProjection {
 > A query handler class can currently contain several identical query handling methods. The outcome of which method will actually be called is however unspecified.
 >
 > Note that this should be regarded as a _very_ uncommon scenario, as typically identical query handling methods would be spread over several query handlers.
-

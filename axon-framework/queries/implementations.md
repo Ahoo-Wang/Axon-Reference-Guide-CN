@@ -1,4 +1,8 @@
-# Implementations
+---
+description: Implementations
+---
+
+# 实现
 
 When it comes to dispatching queries, as explained in the [Dispatching Queries](query-dispatchers.md) section, there are a couple of implementations when it comes to actually sending the query message in question. The next sections provide an overview of the possible implementations, as well as pointing out how to set up query dispatching infrastructure with Axon.
 
@@ -6,7 +10,7 @@ When it comes to dispatching queries, as explained in the [Dispatching Queries](
 
 The query gateway is a convenient interface towards the query dispatching mechanism. While you are not required to use a gateway to dispatch queries, it is generally the easiest option to do so.
 
-Axon provides a `QueryGateway` interface and the `DefaultQueryGateway` implementation. The query gateway provides a number of methods that allow you to send a query and wait for a single or multiple results either synchronously, with a timeout or asynchronously. The query gateway needs to be configured with access to the query bus and a \(possibly empty\) list of `QueryDispatchInterceptor`s.
+Axon provides a `QueryGateway` interface and the `DefaultQueryGateway` implementation. The query gateway provides a number of methods that allow you to send a query and wait for a single or multiple results either synchronously, with a timeout or asynchronously. The query gateway needs to be configured with access to the query bus and a (possibly empty) list of `QueryDispatchInterceptor`s.
 
 ## Query Bus
 
@@ -22,7 +26,7 @@ Axon provides a query bus out of the box, the `AxonServerQueryBus`. It connects 
 {% tab title="Axon Configuration API" %}
 Declare dependencies:
 
-```text
+```
 <!--somewhere in the POM file-->
 <dependency>
     <groupId>org.axonframework</groupId>
@@ -48,7 +52,7 @@ Configurer configurer = DefaultConfigurer.defaultConfiguration();
 {% tab title="Spring Boot AutoConfiguration" %}
 By simply declaring dependency to `axon-spring-boot-starter`, Axon will automatically configure the Axon Server Query Bus:
 
-```text
+```
 <!--somewhere in the POM file-->
 <dependency>
     <groupId>org.axonframework</groupId>
@@ -59,13 +63,13 @@ By simply declaring dependency to `axon-spring-boot-starter`, Axon will automati
 
 > **Excluding the Axon Server Connector**
 >
-> If you exclude the `axon-server-connector` dependency you will fallback to 'non-axon-server' query bus option, the `SimpleQueryBus` \(see [below](implementations.md)\)
+> If you exclude the `axon-server-connector` dependency you will fallback to 'non-axon-server' query bus option, the `SimpleQueryBus` (see [below](implementations.md))
 {% endtab %}
 {% endtabs %}
 
 ### SimpleQueryBus
 
-The `SimpleQueryBus` does straightforward processing of queries in the thread that dispatches them. To configure a `SimpleQueryBus` \(instead of an `AxonServerQueryBus`\):
+The `SimpleQueryBus` does straightforward processing of queries in the thread that dispatches them. To configure a `SimpleQueryBus` (instead of an `AxonServerQueryBus`):
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -81,7 +85,7 @@ Configurer configurer = DefaultConfigurer.defaultConfiguration()
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-```text
+```
 @Bean
 public SimpleQueryBus queryBus(AxonConfiguration axonConfiguration, TransactionManager transactionManager) {
     return SimpleQueryBus.builder()
@@ -97,4 +101,3 @@ public SimpleQueryBus queryBus(AxonConfiguration axonConfiguration, TransactionM
 ```
 {% endtab %}
 {% endtabs %}
-
