@@ -1,18 +1,19 @@
----
-description: Infrastructure
----
+# Infrastructure
 
-# 基础设施
+Command dispatching, as exemplified in the [Dispatching Commands](command-dispatchers.md) page, has a number of advantages. 
+Firstly, it constructs an object that clearly describes the intent of the client. 
+By logging the command, you store both the intent and the related data for future reference. 
+Command handling also makes it easy to expose your command processing components to remote clients, via web services for example. 
 
-Command dispatching, as exemplified in the [Dispatching Commands](command-dispatchers.md) page, has a number of advantages. Firstly, it constructs an object that clearly describes the intent of the client. By logging the command, you store both the intent and the related data for future reference. Command handling also makes it easy to expose your command processing components to remote clients, via web services for example.
-
-Testing also becomes a lot easier. You could define test scripts by just defining the starting situation (given), command to execute (when) and expected results (then) by listing a number of events and commands (see [Testing](../testing/commands-events.md) for more on this).
+Testing also becomes a lot easier. 
+You could define test scripts by just defining the starting situation \(given\), command to execute \(when\) and expected results \(then\) by listing a number of events and commands \(see [Testing](../testing/commands-events.md) for more on this\).
 
 The last major advantage is that it is very easy to switch between synchronous and asynchronous, as well as local versus distributed command processing.
 
-This does not mean command dispatching using explicit command objects is the only way to do it. The goal of Axon is not to prescribe a specific way of working, but to support you doing it your way, while providing best practices as the default behavior. It is still possible to use a service layer that you can invoke to execute commands. The method will just need to start a unit of work (see [Unit of Work](../messaging-concepts/unit-of-work.md)) and perform a commit or rollback on it when the method is finished.
+This does not mean command dispatching using explicit command objects is the only way to do it. The goal of Axon is not to prescribe a specific way of working, but to support you doing it your way, while providing best practices as the default behavior. It is still possible to use a service layer that you can invoke to execute commands. The method will just need to start a unit of work \(see [Unit of Work](../messaging-concepts/unit-of-work.md)\) and perform a commit or rollback on it when the method is finished.
 
-The next sections provide an overview of the tasks related to setting up a command dispatching infrastructure with the Axon Framework. The API-friendlier [`CommandGateway`](infrastructure.md#the-command-gateway) is mentioned, as well as the `CommandBus` in both a [local](infrastructure.md#the-command-bus---local) and [distributed](infrastructure.md#the-command-bus---distributed) environment.
+The next sections provide an overview of the tasks related to setting up a command dispatching infrastructure with the Axon Framework.
+The API-friendlier [`CommandGateway`](#the-command-gateway) is mentioned, as well as the `CommandBus` in both a [local](#the-command-bus---local) and [distributed](#the-command-bus---distributed) environment. 
 
 ## The Command Gateway
 
@@ -20,7 +21,7 @@ The Command Gateway is a convenient interface towards the command dispatching me
 
 There are two ways to use a Command Gateway. The first is to use the `CommandGateway` interface and the `DefaultCommandGateway` implementation provided by Axon. The command gateway provides a number of methods that allow you to send a command and wait for a result either synchronously, with a timeout or asynchronously.
 
-The other option is perhaps the most flexible of all. You can turn almost any interface into a command gateway using the `CommandGatewayFactory`. This allows you to define your application's interface using strong typing and declaring your own (checked) business exceptions. Axon will automatically generate an implementation for that interface at runtime.
+The other option is perhaps the most flexible of all. You can turn almost any interface into a command gateway using the `CommandGatewayFactory`. This allows you to define your application's interface using strong typing and declaring your own \(checked\) business exceptions. Axon will automatically generate an implementation for that interface at runtime.
 
 ### Configuring the Command Gateway
 
@@ -32,12 +33,13 @@ The `RetryScheduler` is capable of scheduling retries when command execution has
 
 Currently, two implementations exist:
 
-1.  The `IntervalRetryScheduler` will retry a given command at set intervals until it succeeds,
+1. The `IntervalRetryScheduler` will retry a given command at set intervals until it succeeds,
 
-    or a maximum number of retries has taken place.
-2.  The `ExponentialBackOffIntervalRetryScheduler` retries failed commands with an exponential back-off interval until
+   or a maximum number of retries has taken place.
 
-    it succeeds, or a maximum number of retries has taken place.
+2. The `ExponentialBackOffIntervalRetryScheduler` retries failed commands with an exponential back-off interval until
+
+   it succeeds, or a maximum number of retries has taken place.
 
 **CommandDispatchInterceptor**
 
@@ -55,55 +57,66 @@ This is how parameters affect the behavior of the command gateway:
 
 * The first parameter is expected to be the actual command object to dispatch.
 * Parameters annotated with `@MetaDataValue` will have their value assigned to the metadata field with the identifier passed as annotation parameter
-*   Parameters of type `MetaData` will be merged with the `MetaData` on the `CommandMessage`.
+* Parameters of type `MetaData` will be merged with the `MetaData` on the `CommandMessage`.
 
-    Metadata defined by latter parameters will overwrite the metadata of earlier parameters, if their key is equal.
-* Parameters of type `CommandCallback` will have their `onResult(CommandMessage<? extends C>, CommandResultMessage<? extends R>)` invoked after the command has been handled. Although the `CommandCallback` provides a means to deal with the result of command handling, this is no impact on whether you can define a return type on the custom command gateway. In case both a callback and return type are defined, the invocations of the callback will always match with the return value (or exception). Lastly, know that you may pass in several `CommandCallback` instances, which all will be invoked in order.
-*   The last two parameters indicate a timeout and may be of types `long` (or `int`) and `TimeUnit`.
+  Metadata defined by latter parameters will overwrite the metadata of earlier parameters, if their key is equal.
 
-    The method will block at most as long as these parameters indicate. How the method reacts to a timeout depends on the exceptions declared on the method (see below).
+* Parameters of type `CommandCallback` will have their `onResult(CommandMessage<? extends C>, CommandResultMessage<? extends R>)` invoked after the command has been handled.
+  Although the `CommandCallback` provides a means to deal with the result of command handling, this is no impact on whether you can define a return type on the custom command gateway.
+  In case both a callback and return type are defined, the invocations of the callback will always match with the return value \(or exception\).
+  Lastly, know that you may pass in several `CommandCallback` instances, which all will be invoked in order. 
 
-    Note that if other properties of the method prevent blocking altogether, a timeout will never occur.
+* The last two parameters indicate a timeout and may be of types `long` \(or `int`\) and `TimeUnit`.
+
+  The method will block at most as long as these parameters indicate. How the method reacts to a timeout depends on the exceptions declared on the method \(see below\).
+
+  Note that if other properties of the method prevent blocking altogether, a timeout will never occur.
 
 The declared return value of a method will also affect its behavior:
 
 * A `void` return type will cause the method to return immediately, unless there are other indications on the method that one would want to wait, such as a timeout or declared exceptions.
-*   Return types of `Future`, `CompletionStage` and `CompletableFuture` will cause the method to return immediately.
+* Return types of `Future`, `CompletionStage` and `CompletableFuture` will cause the method to return immediately.
 
-    You can access the result of the command handler using the `CompletableFuture` instance returned from the method.
+  You can access the result of the command handler using the `CompletableFuture` instance returned from the method.
 
-    Exceptions and timeouts declared on the method are ignored.
-*   Any other return type will cause the method to block until a result is available.
+  Exceptions and timeouts declared on the method are ignored.
 
-    The result is cast to the return type (causing a `ClassCastException` if the types do not match).
+* Any other return type will cause the method to block until a result is available.
+
+  The result is cast to the return type \(causing a `ClassCastException` if the types do not match\).
 
 Exceptions have the following effect:
 
-*   Any declared checked exception will be thrown if the command handler (or an interceptor) threw an exception of that type.
+* Any declared checked exception will be thrown if the command handler \(or an interceptor\) threw an exception of that type.
 
-    If a checked exception is thrown that has not been declared, it is wrapped in a `CommandExecutionException`, which is a `RuntimeException`.
-*   When a timeout occurs, the default behavior is to return `null` from the method.
+  If a checked exception is thrown that has not been declared, it is wrapped in a `CommandExecutionException`, which is a `RuntimeException`.
 
-    This can be changed by declaring a `TimeoutException`.
+* When a timeout occurs, the default behavior is to return `null` from the method.
 
-    If this exception is declared, a `TimeoutException` is thrown instead.
-*   When a thread is interrupted while waiting for a result, the default behavior is to return null.
+  This can be changed by declaring a `TimeoutException`.
 
-    In that case, the interrupted flag is set back on the thread.
+  If this exception is declared, a `TimeoutException` is thrown instead.
 
-    By declaring an `InterruptedException` on the method, this behavior is changed to throw that exception instead.
+* When a thread is interrupted while waiting for a result, the default behavior is to return null.
 
-    The interrupt flag is removed when the exception is thrown, consistent with the java specification.
+  In that case, the interrupted flag is set back on the thread.
+
+  By declaring an `InterruptedException` on the method, this behavior is changed to throw that exception instead.
+
+  The interrupt flag is removed when the exception is thrown, consistent with the java specification.
+
 * Other runtime exceptions may be declared on the method, but will not have any effect other than clarification to the API user.
 
 Finally, there is the possibility to use annotations:
 
-*   As specified in the parameter section, the `@MetaDataValue` annotation on a parameter will have the value of that parameter added as metadata value.
+* As specified in the parameter section, the `@MetaDataValue` annotation on a parameter will have the value of that parameter added as metadata value.
 
-    The key of the metadata entry is provided as parameter to the annotation.
-*   Methods annotated with `@Timeout` will block at most the indicated amount of time.
+  The key of the metadata entry is provided as parameter to the annotation.
 
-    This annotation is ignored if the method declares timeout parameters.
+* Methods annotated with `@Timeout` will block at most the indicated amount of time.
+
+  This annotation is ignored if the method declares timeout parameters.
+
 * Classes annotated with `@Timeout` will cause all methods declared in that class to block at most the indicated amount of time, unless they are annotated with their own `@Timeout` annotation or specify timeout parameters.
 
 ```java
@@ -138,11 +151,13 @@ MyGateway myGateway = factory.createGateway(MyGateway.class);
 
 ## The Command Bus - Local
 
-The local command bus is the mechanism that dispatches commands to their respective command handlers within an Axon application. Suggestions on how to use the `CommandBus` can be found [here](command-dispatchers.md#the-command-bus). Several flavors of the command bus, with differing characteristics, exist within the framework.
+The local command bus is the mechanism that dispatches commands to their respective command handlers within an Axon application. 
+Suggestions on how to use the `CommandBus` can be found [here](command-dispatchers.md#the-command-bus). 
+Several flavors of the command bus, with differing characteristics, exist within the framework.
 
 ### SimpleCommandBus
 
-The `SimpleCommandBus` is, as the name suggests, the simplest implementation. It does straightforward processing of commands in the thread that dispatches them. After a command is processed, the modified aggregate(s) are saved and generated events are published in that same thread. In most scenarios, such as web applications, this implementation will suit your needs.
+The `SimpleCommandBus` is, as the name suggests, the simplest implementation. It does straightforward processing of commands in the thread that dispatches them. After a command is processed, the modified aggregate\(s\) are saved and generated events are published in that same thread. In most scenarios, such as web applications, this implementation will suit your needs.
 
 Like most `CommandBus` implementations, the `SimpleCommandBus` allows interceptors to be configured. `CommandDispatchInterceptor`s are invoked when a command is dispatched on the command bus. The `CommandHandlerInterceptor`s are invoked before the actual command handler method is, allowing you to do modify or block the command. See [Command Interceptors](../messaging-concepts/message-intercepting.md#command-interceptors) for more information.
 
@@ -222,99 +237,114 @@ The `SimpleCommandBus` has reasonable performance characteristics. The fact that
 
 The `DisruptorCommandBus` takes a different approach to multithreaded processing. Instead of having multiple threads each doing the same process, there are multiple threads, each taking care of a piece of the process. The `DisruptorCommandBus` uses the [Disruptor](http://lmax-exchange.github.io/disruptor/), a small framework for concurrent programming, to achieve much better performance, by just taking a different approach to multi-threading. Instead of doing the processing in the calling thread, the tasks are handed off to two groups of threads, that each take care of a part of the processing. The first group of threads will execute the command handler, changing an aggregate's state. The second group will store and publish the events to the event store.
 
-While the `DisruptorCommandBus` easily outperforms the `SimpleCommandBus` by a factor of 4(!), there are a few limitations:
+While the `DisruptorCommandBus` easily outperforms the `SimpleCommandBus` by a factor of 4\(!\), there are a few limitations:
 
-*   The `DisruptorCommandBus` only supports event sourced aggregates.
+* The `DisruptorCommandBus` only supports event sourced aggregates.
 
-    This Command Bus also acts as a Repository for the aggregates processed by the Disruptor.
+  This Command Bus also acts as a Repository for the aggregates processed by the Disruptor.
 
-    To get a reference to the Repository, use `createRepository(AggregateFactory)`.
+  To get a reference to the Repository, use `createRepository(AggregateFactory)`.
+
 * A command can only result in a state change in a single aggregate instance.
-*   When using a cache, it allows only a single aggregate for a given identifier.
+* When using a cache, it allows only a single aggregate for a given identifier.
 
-    This means it is not possible to have two aggregates of different types with the same identifier.
-*   Commands should generally not cause a failure that requires a rollback of the unit of work.
+  This means it is not possible to have two aggregates of different types with the same identifier.
 
-    When a rollback occurs, the `DisruptorCommandBus` cannot guarantee that commands are processed in the order they were dispatched.
+* Commands should generally not cause a failure that requires a rollback of the unit of work.
 
-    Furthermore, it requires a retry of a number of other commands, causing unnecessary computations.
-*   When creating a new aggregate instance, commands updating that created instance may not all happen in the exact order as provided.
+  When a rollback occurs, the `DisruptorCommandBus` cannot guarantee that commands are processed in the order they were dispatched.
 
-    Once the aggregate is created, all commands will be executed exactly in the order they were dispatched.
+  Furthermore, it requires a retry of a number of other commands, causing unnecessary computations.
 
-    To ensure the order, use a callback on the creating command to wait for the aggregate being created.
+* When creating a new aggregate instance, commands updating that created instance may not all happen in the exact order as provided.
 
-    It shouldn't take more than a few milliseconds.
+  Once the aggregate is created, all commands will be executed exactly in the order they were dispatched.
+
+  To ensure the order, use a callback on the creating command to wait for the aggregate being created.
+
+  It shouldn't take more than a few milliseconds.
 
 To construct a `DisruptorCommandBus` instance, you need an `EventStore`. This component is explained in the [Event Bus and Event Store](../events/event-bus-and-event-store.md) section.
 
 Optionally, you can provide a `DisruptorConfiguration` instance, which allows you to tweak the configuration to optimize performance for your specific environment:
 
-*   `Buffer size` - the number of slots on the ring buffer to register incoming commands.
+* `Buffer size` - the number of slots on the ring buffer to register incoming commands.
 
-    Higher values may increase throughput, but also cause higher latency. Must always be a power of 2. Defaults to 4096.
+  Higher values may increase throughput, but also cause higher latency. Must always be a power of 2. Defaults to 4096.
+
 * `ProducerType` - indicates whether the entries are produced by a single thread, or multiple. Defaults to multiple.
-*   `WaitStrategy` - the strategy to use when the processor threads (the three threads taking care of the actual processing) need to wait for each other.
+* `WaitStrategy` - the strategy to use when the processor threads \(the three threads taking care of the actual processing\) need to wait for each other.
 
-    The best wait strategy depends on the number of cores available in the machine, and the number of other processes running.
+  The best wait strategy depends on the number of cores available in the machine, and the number of other processes running.
 
-    If low latency is crucial, and the `DisruptorCommandBus` may claim cores for itself, you can use the `BusySpinWaitStrategy`.
+  If low latency is crucial, and the `DisruptorCommandBus` may claim cores for itself, you can use the `BusySpinWaitStrategy`.
 
-    To make the command bus claim less of the CPU and allow other threads to do processing, use the `YieldingWaitStrategy`.
+  To make the command bus claim less of the CPU and allow other threads to do processing, use the `YieldingWaitStrategy`.
 
-    Finally, you can use the `SleepingWaitStrategy` and `BlockingWaitStrategy` to allow other processes a fair share of CPU.
+  Finally, you can use the `SleepingWaitStrategy` and `BlockingWaitStrategy` to allow other processes a fair share of CPU.
 
-    The latter is suitable if the Command Bus is not expected to be processing full-time.
+  The latter is suitable if the Command Bus is not expected to be processing full-time.
 
-    Defaults to the `BlockingWaitStrategy`.
-*   `Executor` - sets the Executor that provides the Threads for the `DisruptorCommandBus`.
+  Defaults to the `BlockingWaitStrategy`.
 
-    This executor must be able to provide at least four threads.
+* `Executor` - sets the Executor that provides the Threads for the `DisruptorCommandBus`.
 
-    Three of the threads are claimed by the processing components of the `DisruptorCommandBus`.
+  This executor must be able to provide at least four threads.
 
-    Extra threads are used to invoke callbacks and to schedule retries in case an Aggregate's state is detected to be corrupt.
+  Three of the threads are claimed by the processing components of the `DisruptorCommandBus`.
 
-    Defaults to a `CachedThreadPool` that provides threads from a thread group called `"DisruptorCommandBus"`.
+  Extra threads are used to invoke callbacks and to schedule retries in case an Aggregate's state is detected to be corrupt.
+
+  Defaults to a `CachedThreadPool` that provides threads from a thread group called `"DisruptorCommandBus"`.
+
 * `TransactionManager` - defines the transaction manager that should ensure that the storage and publication of events are executed within a transaction.
-*   `InvokerInterceptors` - defines the `CommandHandlerInterceptor`s that are to be used in the invocation process.
+* `InvokerInterceptors` - defines the `CommandHandlerInterceptor`s that are to be used in the invocation process.
 
-    This is the process that calls the actual Command Handler method.
-*   `PublisherInterceptors` - defines the `CommandHandlerInterceptor`s that are to be used in the publication process.
+  This is the process that calls the actual Command Handler method.
 
-    This is the process that stores and publishes the generated events.
-*   `RollbackConfiguration` - defines on which Exceptions a Unit of Work should be rolled back.
+* `PublisherInterceptors` - defines the `CommandHandlerInterceptor`s that are to be used in the publication process.
 
-    Defaults to a configuration that rolls back on unchecked exceptions.
-*   `RescheduleCommandsOnCorruptState` - indicates whether Commands that have been executed against an Aggregate that has been corrupted (e.g. because a Unit of Work was rolled back) should be rescheduled.
+  This is the process that stores and publishes the generated events.
 
-    If `false` the callback's `onFailure()` method will be invoked.
+* `RollbackConfiguration` - defines on which Exceptions a Unit of Work should be rolled back.
 
-    If `true` (the default), the command will be rescheduled instead.
-*   `CoolingDownPeriod` - sets the number of seconds to wait to make sure all commands are processed.
+  Defaults to a configuration that rolls back on unchecked exceptions.
 
-    During the cooling down period, no new commands are accepted, but existing commands are processed, and rescheduled when necessary.
+* `RescheduleCommandsOnCorruptState` - indicates whether Commands that have been executed against an Aggregate that has been corrupted \(e.g. because a Unit of Work was rolled back\) should be rescheduled.
 
-    The cooling down period ensures that threads are available for rescheduling the commands and calling callbacks.
+  If `false` the callback's `onFailure()` method will be invoked.
 
-    Defaults to `1000` (1 second).
-*   `Cache` - sets the cache that stores aggregate instances that have been reconstructed from the Event Store.
+  If `true` \(the default\), the command will be rescheduled instead.
 
-    The cache is used to store aggregate instances that are not in active use by the disruptor.
-*   `InvokerThreadCount` - the number of threads to assign to the invocation of command handlers.
+* `CoolingDownPeriod` - sets the number of seconds to wait to make sure all commands are processed.
 
-    A good starting point is half the number of cores in the machine.
-*   `PublisherThreadCount` - the number of threads to use to publish events.
+  During the cooling down period, no new commands are accepted, but existing commands are processed, and rescheduled when necessary.
 
-    A good starting point is half the number of cores, and could be increased if a lot of time is spent on I/O.
-*   `SerializerThreadCount` - the number of threads to use to pre-serialize events.
+  The cooling down period ensures that threads are available for rescheduling the commands and calling callbacks.
 
-    This defaults to `1`, but is ignored if no serializer is configured.
-*   `Serializer` - the serializer to perform pre-serialization with.
+  Defaults to `1000` \(1 second\).
 
-    When a serializer is configured, the `DisruptorCommandBus` will wrap all generated events in a `SerializationAware` message.
+* `Cache` - sets the cache that stores aggregate instances that have been reconstructed from the Event Store.
 
-    The serialized form of the payload and metadata is attached before they are published to the Event Store.
+  The cache is used to store aggregate instances that are not in active use by the disruptor.
+
+* `InvokerThreadCount` - the number of threads to assign to the invocation of command handlers.
+
+  A good starting point is half the number of cores in the machine.
+
+* `PublisherThreadCount` - the number of threads to use to publish events.
+
+  A good starting point is half the number of cores, and could be increased if a lot of time is spent on I/O.
+
+* `SerializerThreadCount` - the number of threads to use to pre-serialize events.
+
+  This defaults to `1`, but is ignored if no serializer is configured.
+
+* `Serializer` - the serializer to perform pre-serialization with.
+
+  When a serializer is configured, the `DisruptorCommandBus` will wrap all generated events in a `SerializationAware` message.
+
+  The serialized form of the payload and metadata is attached before they are published to the Event Store.
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -348,39 +378,57 @@ public DisruptorCommandBus commandBus(TransactionManager txManager, AxonConfigur
 
 ## The Command Bus - Distributed
 
-Oftentimes you would want multiple instances of command buses in different JVMs to act as one. Commands dispatched on one JVM's command bus should be seamlessly transported to a command handler in another JVM while sending back any results. That is where the concept of 'distributing the command bus' comes in.
+Oftentimes you would want multiple instances of command buses in different JVMs to act as one. 
+Commands dispatched on one JVM's command bus should be seamlessly transported to a command handler in another JVM while sending back any results.
+That is where the concept of 'distributing the command bus' comes in.
 
 There are a couple of concepts that are configurable, regardless of the type of distributed command bus that is being used:
 
 ### Local Segment
 
-Unlike the [local](infrastructure.md#the-command-bus---local) `CommandBus` implementations, the distributed command buses do not invoke any handlers at all. All they do is form a "bridge" between command bus implementations on different JVM's, delegating any received commands to the so-called _local segment_.
+Unlike the [local](#the-command-bus---local) `CommandBus` implementations, the distributed command buses do not invoke any handlers at all.
+All they do is form a "bridge" between command bus implementations on different JVM's, delegating any received commands to the so-called _local segment_.
 
-By default, this local segment is the [`SimpleCommandBus`](infrastructure.md#simplecommandbus). You can configure the local segment to be any of the other local command buses too, like the [`AsynchronousCommandBus`](infrastructure.md#asynchronouscommandbus) and [`DisruptorCommandBus`](infrastructure.md#disruptorcommandbus). The details of how to configure the local segment are shown in the implementation sections.
+By default, this local segment is the [`SimpleCommandBus`](infrastructure.md#simplecommandbus).
+You can configure the local segment to be any of the other local command buses too, like the [`AsynchronousCommandBus`](infrastructure.md#asynchronouscommandbus) and [`DisruptorCommandBus`](infrastructure.md#disruptorcommandbus).
+The details of how to configure the local segment are shown in the implementation sections.
 
 ### Load Factor
 
-The load factor defines the amount of load an Axon application would carry compared to other instances. For example, if you have a two machine set up, each with a load factor of 100, they will both carry an equal amount of load.
+The load factor defines the amount of load an Axon application would carry compared to other instances.
+For example, if you have a two machine set up, each with a load factor of 100, they will both carry an equal amount of load.
 
-Increasing the load factor to 200 on both would still mean that both machines receive the same amount of load. This points out that the load factor will only change the load amongst systems if the values are not equal. Doing so would make sense in a heterogeneous application landscape, where the faster machines should deal with a bigger portion of command handling than the slower machines.
+Increasing the load factor to 200 on both would still mean that both machines receive the same amount of load.
+This points out that the load factor will only change the load amongst systems if the values are not equal.
+Doing so would make sense in a heterogeneous application landscape, where the faster machines should deal with a bigger portion of command handling than the slower machines.
 
-The default load factor set for the distributed `CommandBus` implementations is 100. The configuration changes slightly per distributed implementation and as such will be covered in those sections.
+The default load factor set for the distributed `CommandBus` implementations is 100.
+The configuration changes slightly per distributed implementation and as such will be covered in those sections.
 
 ### Routing Strategy
 
-Commands should be [routed consistently](../../architecture-overview/#explicit-messaging) to the same application, especially those targeted towards a specific Aggregate. This ensures a single instance is in charge of the targeted aggregate, resolving the concurrent access issue and allowing for optimization like caching to work as designed. The component dealing with the consistent routing in an Axon application is the `RoutingStrategy`.
+Commands should be [routed consistently](../../architecture-overview/README.md#explicit-messaging) to the same application, especially those targeted towards a specific Aggregate.
+This ensures a single instance is in charge of the targeted aggregate, resolving the concurrent access issue and allowing for optimization like caching to work as designed.
+The component dealing with the consistent routing in an Axon application is the `RoutingStrategy`.
 
-The `RoutingStrategy` receives a `CommandMessage` and based on the message returns the routing key to use. Two commands with the same routing key will **always** be routed to the same segment, as long as there is no topology change in the distributed set-up.
+The `RoutingStrategy` receives a `CommandMessage` and based on the message returns the routing key to use.
+Two commands with the same routing key will **always** be routed to the same segment, as long as there is no topology change in the distributed set-up.
 
-At the moment, there are five implementations of the `RoutingStrategy`. Three of these are intended to be fallback solutions, in case the routing key cannot be resolved:
+At the moment, there are five implementations of the `RoutingStrategy`. 
+Three of these are intended to be fallback solutions, in case the routing key cannot be resolved:
 
-1. The `AnnotationRoutingStrategy` - the **default** routing strategy expects the `TargetAggregateIdentifier` or `RoutingKey` annotation to be present on a field inside the command class. The annotated field or getter is searched, and the contents will be returned as the routing key for that command.
-2. The `MetaDataRoutingStrategy` - uses a property defined during creation of this strategy to fetch the routing key from the `CommandMessage`'s `MetaData`.
-3. The `ERROR` `UnresolvedRoutingKeyPolicy` - the **default fallback** that will cause an exception to be thrown when the routing key cannot be resolved from the given `CommandMessage`.
-4. The `RANDOM_KEY` `UnresolvedRoutingKeyPolicy` - will return a random value when a routing key cannot be resolved from the `CommandMessage`. This means that those commands will be routed to a random segment of the command bus.
-5. The `STATIC_KEY` `UnresolvedRoutingKeyPolicy` - will return a static key (named "unresolved") for unresolved routing keys. This policy routes all commands to the same segment, as long as the configuration of segments does not change.
+ 1. The `AnnotationRoutingStrategy` - the **default** routing strategy expects the `TargetAggregateIdentifier` or `RoutingKey` annotation to be present on a field inside the command class. 
+    The annotated field or getter is searched, and the contents will be returned as the routing key for that command.
+ 2. The `MetaDataRoutingStrategy` - uses a property defined during creation of this strategy to fetch the routing key from the `CommandMessage`'s `MetaData`.
+ 3. The `ERROR` `UnresolvedRoutingKeyPolicy` - the **default fallback** that will cause an exception to be thrown when the routing key cannot be resolved from the given `CommandMessage`.
+ 4. The `RANDOM_KEY` `UnresolvedRoutingKeyPolicy` - will return a random value when a routing key cannot be resolved from the `CommandMessage`. 
+    This means that those commands will be routed to a random segment of the command bus.
+ 5. The `STATIC_KEY` `UnresolvedRoutingKeyPolicy` - will return a static key \(named "unresolved"\) for unresolved routing keys. 
+    This policy routes all commands to the same segment, as long as the configuration of segments does not change.
 
-The `AnnotationRoutingStrategy` and `MetaDataRoutingStrategy` are considered the full implementations to configure. The `ERROR`, `RANDOM_KEY` and `STATIC_KEY` are _fallback routing strategies_ that should be configured on the annotation or meta-data implementations. To get a grasp how these are constructed, consider the following sample:
+The `AnnotationRoutingStrategy` and `MetaDataRoutingStrategy` are considered the full implementations to configure.
+The `ERROR`, `RANDOM_KEY` and `STATIC_KEY` are _fallback routing strategies_ that should be configured on the annotation or meta-data implementations.
+To get a grasp how these are constructed, consider the following sample:
 
 {% tabs %}
 {% tab title="AnnotationRoutingStrategy" %}
@@ -411,7 +459,8 @@ public RoutingStrategy routingStrategy() {
 {% endtab %}
 {% endtabs %}
 
-Of course, a custom implementation of the `RoutingStrategy` can also be provided when necessary. When we need to deviate from the default `AnnotationRoutingStrategy`, we should configure it like so:
+Of course, a custom implementation of the `RoutingStrategy` can also be provided when necessary.
+When we need to deviate from the default `AnnotationRoutingStrategy`, we should configure it like so: 
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -441,15 +490,15 @@ public class AxonConfig {
 
 ### AxonServerCommandBus
 
-The `AxonServerCommandBus` is the _default_ distributed `CommandBus` implementation that is set by the framework. It connects to [AxonServer](../../axon-server-introduction.md), with which it can send and receive commands.
+The `AxonServerCommandBus` is the _default_ distributed `CommandBus` implementation that is set by the framework.
+It connects to [AxonServer](../../axon-server-introduction.md), with which it can send and receive commands.
 
 As it is the default, configuring it is relatively straightforward:
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
 Declare dependencies:
-
-```
+```text
 <!-- somewhere in the POM file... -->
 <dependencyManagement>
     <!-- amongst the dependencies... -->
@@ -480,7 +529,6 @@ Declare dependencies:
 ```
 
 Configure your application:
-
 ```java
 // The AxonServerCommandBus is configured as Command Bus by default when constructing a DefaultConfigurer.
 Configurer configurer = DefaultConfigurer.defaultConfiguration();
@@ -490,7 +538,7 @@ Configurer configurer = DefaultConfigurer.defaultConfiguration();
 {% tab title="Spring Boot AutoConfiguration" %}
 By simply including the `axon-spring-boot-starter` dependency, Axon will automatically configure the `AxonServerCommandBus`:
 
-```
+```text
 <!--somewhere in the POM file-->
 <dependency>
     <groupId>org.axonframework</groupId>
@@ -498,6 +546,7 @@ By simply including the `axon-spring-boot-starter` dependency, Axon will automat
     <version>${axon.version}</version>
 </dependency>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -512,9 +561,11 @@ By simply including the `axon-spring-boot-starter` dependency, Axon will automat
 
 #### Local Segment and Load Factor Configuration
 
-The [load factor](infrastructure.md#load-factor) for the `AxonServerCommandBus` is defined through the `CommandLoadFactorProvider`. This interface allows us to distinguish between commands to, for example, use a different load factor per command message. This might be useful if some commands are routed more often towards one instance in favour of the other.
+The [load factor](#load-factor) for the `AxonServerCommandBus` is defined through the `CommandLoadFactorProvider`.
+This interface allows us to distinguish between commands to, for example, use a different load factor per command message.
+This might be useful if some commands are routed more often towards one instance in favour of the other.
 
-The following should be done to configure a custom [local segment](infrastructure.md#local-segment) and/or load factor:
+The following should be done to configure a custom [local segment](#local-segment) and/or load factor:
 
 {% tabs %}
 {% tab title="Axon Configuration API" %}
@@ -555,23 +606,28 @@ public class AxonConfig {
 
 ### DistributedCommandBus
 
-The alternative to the [`AxonServerCommandBus`](infrastructure.md#axonservercommandbus) is the `DistributedCommandBus`. Each instance of the `DistributedCommandBus` on each JVM is referred to as a "Segment".
+The alternative to the [`AxonServerCommandBus`](#axonservercommandbus) is the `DistributedCommandBus`.
+Each instance of the `DistributedCommandBus` on each JVM is referred to as a "Segment".
 
 ![Structure of the Distributed Command Bus](../../.gitbook/assets/distributed-command-bus.png)
 
-The `DistributedCommandBus` relies on two components:
+The `DistributedCommandBus` relies on two components: 
 
-1. The `CommandBusConnector` - implements the communication protocol between the JVM's to send the command over the wire and to receive the response.
-2. The `CommandRouter` - chooses the destination for each incoming command. It defines which segment of the `DistributedCommandBus` should be given a command, based on a routing key calculated by the [routing strategy](infrastructure.md#routing-strategy).
+ 1. The `CommandBusConnector` - implements the communication protocol between the JVM's to send the command over the wire and to receive the response. 
+ 2. The `CommandRouter` - chooses the destination for each incoming command.
+    It defines which segment of the `DistributedCommandBus` should be given a command, based on a routing key calculated by the [routing strategy](#routing-strategy).
+    
+You can choose different flavors of these components that are available as extension modules.
+Currently, Axon provides two extensions to that end, which are:
 
-You can choose different flavors of these components that are available as extension modules. Currently, Axon provides two extensions to that end, which are:
+ 1. The [SpringCloud](../../extensions/spring-cloud.md) extension 
+ 2. The [JGroups](../../extensions/jgroups.md) extension
 
-1. The [SpringCloud](../../extensions/spring-cloud.md) extension
-2. The [JGroups](../../extensions/jgroups.md) extension
+Configuring a distributed command bus can \(mostly\) be done without any modifications in configuration files.
+The most straightforward approach to this is to include the Spring Boot starter dependency of either the Spring Cloud or JGroups extension.
+With that in place, a single property needs to be added to the application context, to enable the `DistributedCommandBus`:
 
-Configuring a distributed command bus can (mostly) be done without any modifications in configuration files. The most straightforward approach to this is to include the Spring Boot starter dependency of either the Spring Cloud or JGroups extension. With that in place, a single property needs to be added to the application context, to enable the `DistributedCommandBus`:
-
-```
+```text
 axon.distributed.enabled=true
 ```
 

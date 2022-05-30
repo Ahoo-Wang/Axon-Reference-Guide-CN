@@ -1,6 +1,10 @@
-# Architecture Overview
+---
+description: Architecture Overview
+---
 
-Axon based applications follow an architectural pattern which is based on the principles of Domain-Driven Design \(DDD\), Command Query Responsibility Segregation \(CQRS\) and Event-Driven Architecture \(EDA\). The combination of these principles make Axon based applications more robust and adaptable to accommodate change required by the changes in our business domain.
+# 架构概览
+
+Axon based applications follow an architectural pattern which is based on the principles of Domain-Driven Design (DDD), Command Query Responsibility Segregation (CQRS) and Event-Driven Architecture (EDA). The combination of these principles make Axon based applications more robust and adaptable to accommodate change required by the changes in our business domain.
 
 Axon finds its use in both large monolithic applications, wherein the internal structure is essential to keep the monolith adaptable, as well as microservices, where the distributed nature of the system adds complexity.
 
@@ -14,9 +18,9 @@ While Axon is opinionated on how the interaction with a domain model should take
 
 ### DDD & CQRS
 
-Domain-Driven Design \(DDD\) describes an approach to building software that puts a lot of emphasis on the design of a model, leveraging the use of ubiquitous language . The domain model is the heart of software, and should correctly capture and deal with the essential complexity of the domain.
+Domain-Driven Design (DDD) describes an approach to building software that puts a lot of emphasis on the design of a model, leveraging the use of ubiquitous language . The domain model is the heart of software, and should correctly capture and deal with the essential complexity of the domain.
 
-Command Query Responsibility Segregation \(CQRS\) is an architectural pattern that describes the distinction between the parts of an application that deals with Commands \(requests to change an application's state\) and those that answer Queries \(requests for information about the application's state\).
+Command Query Responsibility Segregation (CQRS) is an architectural pattern that describes the distinction between the parts of an application that deals with Commands (requests to change an application's state) and those that answer Queries (requests for information about the application's state).
 
 When combining DDD and CQRS, one divides an application into components, where each component either provides information about the application's state, or that changes the application's state. Each of these components have a model that focuses on these responsibilities.
 
@@ -24,15 +28,15 @@ The image below shows a typical architecture of an Axon based application.
 
 ![Architecture overview of a CQRS based Axon application](../.gitbook/assets/architecture-overview.png)
 
-In such an architecture, a UI \(or API\) can send commands to request to change an application's state. These Commands are handled by a Command Handling component, which uses a model to validate the command and make decisions on which side-effects to trigger \(if any\).
+In such an architecture, a UI (or API) can send commands to request to change an application's state. These Commands are handled by a Command Handling component, which uses a model to validate the command and make decisions on which side-effects to trigger (if any).
 
 The side-effects caused by Commands are published using Events. These Events are picked up by one or more Event Handling components that take the appropriate action. A typical action is updating the view models, which allow the UI to render the application's state. Other actions could be sending messages to external components, or even triggering other side-effects through new commands.
 
-The separation of the Command Model and the Query Models \(also called View Models or Projections\) allows these models to only focus on that specific aspect of the application. This makes each individual model easier to comprehend, and therefore more maintainable in the long term.
+The separation of the Command Model and the Query Models (also called View Models or Projections) allows these models to only focus on that specific aspect of the application. This makes each individual model easier to comprehend, and therefore more maintainable in the long term.
 
 ### Separation of business logic and infrastructure
 
-An increase in accidental complexity is often caused by leaky abstractions where infrastructure concerns are mixed with business logic. Axon makes it a top priority to keep the two strictly separated. Everywhere in Axon's design, it makes a clear distinction between _what_ you want to do \(e.g. publish an event\) and _how_ that is actually done \(e.g. event publication implementation\).
+An increase in accidental complexity is often caused by leaky abstractions where infrastructure concerns are mixed with business logic. Axon makes it a top priority to keep the two strictly separated. Everywhere in Axon's design, it makes a clear distinction between _what_ you want to do (e.g. publish an event) and _how_ that is actually done (e.g. event publication implementation).
 
 This makes Axon extremely configurable and adaptable to your specific situation. More importantly, it keeps accidental complexity to a minimum. For example, while Axon makes it easy to implement Event Sourced Aggregates, by no means does it enforce the aggregate to be Event Sourced. The Repository interface abstracts this decision entirely. Also, a component that decides to send a Command via a Command Bus, is in no way responsible for deciding how that message is transported to the handler.
 
@@ -58,7 +62,7 @@ Axon separates Messages in roughly three categories:
 
 The biggest benefit of using explicit Messages, is that components that interact with each other don't need to know the location of their counterpart. In fact, in most cases, the sending component isn't even interested in the actual destination of a message. We call this "Location Transparency".
 
-Axon takes location transparency further than placing services behind a logical URL. In Axon, a component that sends a message does not need to specify a destination for that message. Messages are routed based on their stereotype \(Command, Query or Event\) and the type of payload that they carry. Axon uses an application's capabilities to find a suitable destination for a message automatically.
+Axon takes location transparency further than placing services behind a logical URL. In Axon, a component that sends a message does not need to specify a destination for that message. Messages are routed based on their stereotype (Command, Query or Event) and the type of payload that they carry. Axon uses an application's capabilities to find a suitable destination for a message automatically.
 
 A system built up of Location Transparent components makes that system highly adaptable. For example, a monolithic system built out of well-separated components that communicate solely using Commands, Events and Queries, can be easily split into separately deployed units, without any impact on functionality.
 
@@ -68,7 +72,7 @@ This makes Axon highly suitable for Microservices environments. Logic can be eas
 
 ### Event Sourcing
 
-In many systems, events are given a lot of extra attention. While Axon clearly acknowledges that not every message is an Event \(there are also Commands and Queries\), there is something special about events.
+In many systems, events are given a lot of extra attention. While Axon clearly acknowledges that not every message is an Event (there are also Commands and Queries), there is something special about events.
 
 Events retain value. Where the value of Commands and Queries reduce significantly when they have triggered their side-effects or provided their results, Events represent something that has happened, which may be useful to know for a long time after the occurrence of the event.
 
@@ -79,4 +83,3 @@ Event Sourcing is the process where Events are not only generated as the side-ef
 Event Sourcing can be immensely complex to implement yourself. Axon provides the APIs necessary to make it very easy and even a more natural approach to building a command model. Axon's test fixtures help ensure that certain guidelines and requirements are properly followed.
 
 Having a reliable audit trail has not only proven useful for auditability of a system, it also provides the information necessary to build new view models, do data analysis and provide a solid basis for machine learning algorithms.
-

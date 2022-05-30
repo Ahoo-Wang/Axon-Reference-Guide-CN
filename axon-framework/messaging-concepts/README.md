@@ -1,8 +1,4 @@
----
-description: Messaging Concepts
----
-
-# 消息传递概念
+# Messaging Concepts
 
 One of the core concepts in Axon is messaging. All communication between components is done using message objects. This gives these components the location transparency needed to be able to scale and distribute these components when necessary.‌
 
@@ -10,7 +6,7 @@ Although all these messages implement the `Message` interface, there is a clear 
 
 All messages contain a payload, meta data and unique identifier. The payload of the message is the functional description of what the message means. The combination of the class name of this object and the data it carries, describe the application's meaning of the message. The metadata allows you to describe the context in which a message is being sent. You can, for example, store tracing information, to allow the origin or cause of messages to be tracked. You can also store information to describe the security context under which a command is being executed.‌
 
-​[Axon Coding Tutorial #2: - The Core API](https://youtu.be/vnCxjWZrrk0)​
+​[Axon Coding Tutorial \#2: - The Core API](https://youtu.be/vnCxjWZrrk0)​
 
 > **Note**
 >
@@ -18,21 +14,21 @@ All messages contain a payload, meta data and unique identifier. The payload of 
 
 ‌
 
-## Commands <a href="#commands" id="commands"></a>
+## Commands <a id="commands"></a>
 
 ‌
 
-Commands describe an intent to change the application's state. They are implemented as (preferably read-only) POJOs that are wrapped using one of the `CommandMessage` implementations.‌
+Commands describe an intent to change the application's state. They are implemented as \(preferably read-only\) POJOs that are wrapped using one of the `CommandMessage` implementations.‌
 
 Commands always have exactly one destination. While the sender does not care which component handles the command or where that component resides, it may be interesting knowing the outcome of it. That is why command messages sent over the command bus allow for a result to be returned.‌
 
-## Events <a href="#events" id="events"></a>
+## Events <a id="events"></a>
 
 ‌
 
 Events are objects that describe something that has occurred in the application. A typical source of events is the aggregate. When something important has occurred within the aggregate, it will raise an event. In Axon Framework, events can be any object. You are highly encouraged to make sure all events are serializable.‌
 
-When Events are dispatched, Axon wraps them in an `EventMessage`. The actual type of Message used depends on the origin of the event. When an event is raised by an aggregate, it is wrapped in a `DomainEventMessage` (which extends `EventMessage`). All other events are wrapped in an `EventMessage` . Aside from common `Message` attributes like the unique Identifier an `EventMessage` also contains a timestamp. The `DomainEventMessage` additionally contains the type and identifier of the aggregate that raised the event. It also contains the sequence number of the event in the aggregate's event stream, which allows the order of events to be reproduced.
+When Events are dispatched, Axon wraps them in an `EventMessage`. The actual type of Message used depends on the origin of the event. When an event is raised by an aggregate, it is wrapped in a `DomainEventMessage` \(which extends `EventMessage`\). All other events are wrapped in an `EventMessage` . Aside from common `Message` attributes like the unique Identifier an `EventMessage` also contains a timestamp. The `DomainEventMessage` additionally contains the type and identifier of the aggregate that raised the event. It also contains the sequence number of the event in the aggregate's event stream, which allows the order of events to be reproduced.
 
 > **Note**
 >
@@ -52,16 +48,17 @@ Although not enforced, it is good practice to make domain events immutable, pref
 
 > **Note**
 >
-> Although domain events technically indicate a state change, you should try to capture the intention of the state in the event, too. A good practice is to use an abstract implementation of a domain event to capture the fact that certain state has changed, and use a concrete sub-implementation of that abstract class that indicates the intention of the change. For example, you could have an abstract `AddressChangedEvent`, and two implementations `ContactMovedEvent` and `AddressCorrectedEvent` that capture the intent of the state change. Some listeners don't care about the intent (e.g. database updating event listeners). These will listen to the abstract type. Other listeners do care about the intent and these will listen to the concrete subtypes (e.g. to send an address change confirmation email to the customer).
+> Although domain events technically indicate a state change, you should try to capture the intention of the state in the event, too. A good practice is to use an abstract implementation of a domain event to capture the fact that certain state has changed, and use a concrete sub-implementation of that abstract class that indicates the intention of the change. For example, you could have an abstract `AddressChangedEvent`, and two implementations `ContactMovedEvent` and `AddressCorrectedEvent` that capture the intent of the state change. Some listeners don't care about the intent \(e.g. database updating event listeners\). These will listen to the abstract type. Other listeners do care about the intent and these will listen to the concrete subtypes \(e.g. to send an address change confirmation email to the customer\).
 >
-> ​​!["Adding intent to events](https://github.com/domaincomponents/axon-reference-guide-dev/tree/a35820ab094a48b706169ac15cff41e83ef81622/configuring-infrastructure-components/.gitbook/assets/state-change-intent.png)​
+> ​​![ &quot;Adding intent to events](https://github.com/domaincomponents/axon-reference-guide-dev/tree/a35820ab094a48b706169ac15cff41e83ef81622/configuring-infrastructure-components/.gitbook/assets/state-change-intent.png)​
 
 ‌
 
-When dispatching an Event on the Event Bus, you will need to wrap it in an Event Message. The `GenericEventMessage` is an implementation that allows you to wrap your Event in a Message. You can use the constructor, or the static `asEventMessage()` method. The latter checks whether the given parameter doesn't already implement the `Message` interface. If so, it is either returned directly (if it implements `EventMessage`,) or it returns a new `GenericEventMessage` using the given `Message`'s payload and Meta Data. If an Event is applied (published) by an Aggregate Axon will automatically wrap the Event in a `DomainEventMessage` containing the Aggregate's Identifier, Type and Sequence Number.‌
+When dispatching an Event on the Event Bus, you will need to wrap it in an Event Message. The `GenericEventMessage` is an implementation that allows you to wrap your Event in a Message. You can use the constructor, or the static `asEventMessage()` method. The latter checks whether the given parameter doesn't already implement the `Message` interface. If so, it is either returned directly \(if it implements `EventMessage`,\) or it returns a new `GenericEventMessage` using the given `Message`'s payload and Meta Data. If an Event is applied \(published\) by an Aggregate Axon will automatically wrap the Event in a `DomainEventMessage` containing the Aggregate's Identifier, Type and Sequence Number.‌
 
-## Queries <a href="#queries" id="queries"></a>
+## Queries <a id="queries"></a>
 
 ‌
 
 Queries describe a request for information or state. A query can have multiple handlers. When dispatching queries, the client indicates whether he wants a result from one or from all available query handlers.
+

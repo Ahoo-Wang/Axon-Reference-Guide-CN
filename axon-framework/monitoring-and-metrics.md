@@ -1,14 +1,18 @@
-# Monitoring and Metrics
+---
+description: Monitoring and Metrics
+---
+
+# 监控和指标
 
 The ability to monitor and measure what is going on is very important. Especially in a location transparent environment like an Axon application it is very important to be able to trace your message and check the ingestion rate of it.‌
 
-## Monitoring <a id="monitoring"></a>
+## Monitoring <a href="#monitoring" id="monitoring"></a>
 
 ‌
 
 Monitoring a message centric application will require you to be able to see where your messages are at a given point in time. This translates to being able to track your commands, events and queries from one component to another in an Axon application.‌
 
-### Correlation Data <a id="correlation-data"></a>
+### Correlation Data <a href="#correlation-data" id="correlation-data"></a>
 
 One import aspect in regards to this is tracing a given message. To that end the framework provides the `CorrelationDataProvider`, as described briefly [here](messaging-concepts/message-intercepting.md). This interface and its implementations provide you the means to populate the meta-data of your messages with specific fields, like a 'trace-id', 'correlation-id' or any other field you might be interested in.‌
 
@@ -36,7 +40,7 @@ public class MonitoringConfiguration {
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-```text
+```
 public class MonitoringConfiguration {
 
     // When using Spring Boot, simply defining a CorrelationDataProvider bean is sufficient
@@ -49,17 +53,15 @@ public class MonitoringConfiguration {
 {% endtab %}
 {% endtabs %}
 
-### Interceptor Logging <a id="interceptor-logging"></a>
+### Interceptor Logging <a href="#interceptor-logging" id="interceptor-logging"></a>
 
-Another good approach to track the flow of messages throughout an Axon application is by setting up the right interceptors in your application. There are two flavors of interceptors, the Dispatch and Handler Interceptors \(as discussed [here](messaging-concepts/message-intercepting.md)\), which intercept a message prior to publishing \(Dispatch Interceptor\) or while it is being handled \(Handler Interceptor\). The interceptor mechanism lends itself quite nicely to introduce a way to consistently log when a message is being dispatched/handled. The `LoggingInterceptor` is an out of the box solution to log any type of message to SLF4J, but also provides a simple overridable template to set up your own desired logging format. We refer to the command, event and query sections for the specifics on how to configure message interceptors.‌
+Another good approach to track the flow of messages throughout an Axon application is by setting up the right interceptors in your application. There are two flavors of interceptors, the Dispatch and Handler Interceptors (as discussed [here](messaging-concepts/message-intercepting.md)), which intercept a message prior to publishing (Dispatch Interceptor) or while it is being handled (Handler Interceptor). The interceptor mechanism lends itself quite nicely to introduce a way to consistently log when a message is being dispatched/handled. The `LoggingInterceptor` is an out of the box solution to log any type of message to SLF4J, but also provides a simple overridable template to set up your own desired logging format. We refer to the command, event and query sections for the specifics on how to configure message interceptors.‌
 
-### Event Tracker Status <a id="event-tracker-status"></a>
+### Event Tracker Status <a href="#event-tracker-status" id="event-tracker-status"></a>
 
-Since [Tracking Tokens](events/event-processors/streaming.md#token-store) "track" the progress of a given Streaming Event Processor, they provide a sensible monitoring hook in any Axon application. 
-Such a hook proves its usefulness when we want to rebuild our view model and we want to check when the processor has caught up with all the events.
+Since [Tracking Tokens](events/event-processors/streaming.md#token-store) "track" the progress of a given Streaming Event Processor, they provide a sensible monitoring hook in any Axon application. Such a hook proves its usefulness when we want to rebuild our view model and we want to check when the processor has caught up with all the events.
 
-To that end the `StreamingEventProcessor` exposes the `processingStatus()` method. 
-It returns a map where the key is the segment identifier and the value is an "Event Tracker Status". 
+To that end the `StreamingEventProcessor` exposes the `processingStatus()` method. It returns a map where the key is the segment identifier and the value is an "Event Tracker Status".
 
 The Event Tracker Status exposes a couple of metrics:
 
@@ -71,16 +73,12 @@ The Event Tracker Status exposes a couple of metrics:
 * A boolean through `isErrorState()` specifying whether the Segment is in an error state.
 * An optional `Throwable` if the Event Tracker reached an error state.
 * An optional `Long` through `getCurrentPosition` defining the current position of the `TrackingToken`.
-* An optional `Long` through `getResetPosition` defining the position at reset of the `TrackingToken`.
-  This field will be `null` in case the `isReplaying()` returns `false`.
-  It is possible to derive an estimated duration of replaying by comparing the current position with this field.
-* An optional `Long` through `mergeCompletedPosition()` defining the position on the `TrackingToken` when merging will be completed.
-  This field will be `null` in case the `isMerging()` returns `false`.
-  It is possible to derive an estimated duration of merging by comparing the current position with this field.
+* An optional `Long` through `getResetPosition` defining the position at reset of the `TrackingToken`. This field will be `null` in case the `isReplaying()` returns `false`. It is possible to derive an estimated duration of replaying by comparing the current position with this field.
+* An optional `Long` through `mergeCompletedPosition()` defining the position on the `TrackingToken` when merging will be completed. This field will be `null` in case the `isMerging()` returns `false`. It is possible to derive an estimated duration of merging by comparing the current position with this field.
 
-## Metrics <a id="metrics"></a>
+## Metrics <a href="#metrics" id="metrics"></a>
 
-Interesting metrics in a message centric system come in several forms and flavors, like count, capacity and latency for example. Axon Framework allows you to retrieve such measurements through the use of the `axon-metrics` or `axon-micrometer` module. With these modules you can register a number of `MessageMonitor` implementations to your messaging components, like the [`CommandBus`](axon-framework-commands/command-dispatchers.md#the-command-bus), [`EventBus`](events/event-bus-and-event-store.md#event-bus), [`QueryBus`](queries/query-dispatchers.md#the-query-bus-and-query-gateway) and [`EventProcessors`](events/event-processors/README.md).
+Interesting metrics in a message centric system come in several forms and flavors, like count, capacity and latency for example. Axon Framework allows you to retrieve such measurements through the use of the `axon-metrics` or `axon-micrometer` module. With these modules you can register a number of `MessageMonitor` implementations to your messaging components, like the [`CommandBus`](axon-framework-commands/command-dispatchers.md#the-command-bus), [`EventBus`](events/event-bus-and-event-store.md#event-bus), [`QueryBus`](queries/query-dispatchers.md#the-query-bus-and-query-gateway) and [`EventProcessors`](events/event-processors/).
 
 `axon-metrics` module uses [Dropwizard Metrics](https://metrics.dropwizard.io/) for registering the measurements correctly. That means that `MessageMonitors` are registered against the Dropwizard `MetricRegistry`.‌
 
@@ -88,10 +86,9 @@ Interesting metrics in a message centric system come in several forms and flavor
 
 The following monitor implementations are currently provided:‌
 
-1. `CapacityMonitor` - Measures message capacity by keeping track of the total time spent on message handling compared to total time it is active.
+1.  `CapacityMonitor` - Measures message capacity by keeping track of the total time spent on message handling compared to total time it is active.
 
-   This returns a number between 0 and n number of threads. Thus, if there are 4 threads working, the maximum capacity is 4 if every thread is active 100% of the time.
-
+    This returns a number between 0 and n number of threads. Thus, if there are 4 threads working, the maximum capacity is 4 if every thread is active 100% of the time.
 2. `EventProcessorLatencyMonitor` - Measures the difference in message timestamps between the last ingested and the last processed event message.
 3. `MessageCountingMonitor` - Counts the number of ingested, successful, failed, ignored and processed messages.
 4. `MessageTimerMonitor` - Keeps a timer for all successful, failed and ignored messages, as well as an overall timer for all three combined.
@@ -123,7 +120,7 @@ public class MetricsConfiguration {
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-```text
+```
 # The default value is `true`. Thus you will have Metrics configured if `axon-metrics` and `io.dropwizard.metrics` are on your classpath.
 axon.metrics.auto-configuration.enabled=true
 ```
@@ -168,7 +165,7 @@ public class MetricsConfiguration {
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration - Without Tags" %}
-```text
+```
 # The default value is `true`. 
 # Thus you will have Metrics configured if `axon-micrometer` and 
 #  appropriate metric implementation (for example: `micrometer-registry-prometheus`) are on your classpath.
@@ -182,8 +179,9 @@ management.metrics.export.prometheus.enabled=true
 management.endpoint.prometheus.enabled=true
 ```
 {% endtab %}
+
 {% tab title="Spring Boot AutoConfiguration - With Tags" %}
-```text
+```
 # The default value is `true`. 
 # Thus you will have Metrics configured if `axon-micrometer` and 
 #  appropriate metric implementation (for example: `micrometer-registry-prometheus`) are on your classpath.
@@ -205,8 +203,7 @@ management.endpoint.prometheus.enabled=true
 {% endtab %}
 {% endtabs %}
 
-The scenario might occur that more fine-grained control over which `MessageMonitor` instance are defined is necessary.
-The following snippet provides as sample if you want to have more specific metrics on any of the message handling components:
+The scenario might occur that more fine-grained control over which `MessageMonitor` instance are defined is necessary. The following snippet provides as sample if you want to have more specific metrics on any of the message handling components:
 
 ```java
 // Java (Spring Boot Configuration) - Micrometer example
@@ -327,4 +324,3 @@ public class MetricsConfig {
     }
 }
 ```
-

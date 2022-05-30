@@ -1,18 +1,14 @@
----
-description: Event Segments
----
-
-# 事件段
+# Event Segments
 
 Typically, application components contain one or more Event Processors which are responsible for processing incoming events. Tracking Event Processors have configuration aspects that can be changed at runtime to accommodate for changes in the system topology.
 
-## Increasing and decreasing segment counts <a href="#increasing-and-decreasing-segment-counts" id="increasing-and-decreasing-segment-counts"></a>
+## Increasing and decreasing segment counts <a id="increasing-and-decreasing-segment-counts"></a>
 
 Tracking Event Processors that handle events in multiple threads use segments to separate the events in the stream across these threads in a reliable way. However, especially when these threads are spread across multiple instances of a component, and the number of instances changes, it may be useful to scale the number of segments accordingly.
 
 To this end, Axon Framework provides a [split and merge API](../../axon-framework/events/event-processors/streaming.md#splitting-and-merging-segments). This API can be utilized directly or through Axon Server, where the latter takes required coordination into account.
 
-### Segment tuning through Axon Server <a href="#segment-tuning-through-axon-server" id="segment-tuning-through-axon-server"></a>
+### Segment tuning through Axon Server <a id="segment-tuning-through-axon-server"></a>
 
 Axon Server provides an API to trigger the increase and decrease of the number of Segments, at runtime, across different instances of a processor. Follow these steps to increase or decrease the number of segments for a processor:
 

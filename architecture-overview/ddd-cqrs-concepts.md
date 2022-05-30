@@ -1,6 +1,12 @@
-# DDD & CQRS Concepts
+---
+description: DDD & CQRS Concepts
+---
 
-Axon is heavily based on the principles of Domain-Driven Design \(DDD\) and Command Query Responsibility Separation. While a full explanation of these concepts is beyond the scope and intent of this reference guide, we do want to provide a summary of the most important concepts in the context of an Axon application.
+# DDD & CQRS 概念
+
+Axon 是重度基于领域驱动设计（DDD）和命令查询职责分离的原则。虽然对这些概念的完整解释超出了本参考指南的范围和意图，但我们确实希望提供 Axon 应用程序上下问中最重要的概念的概要。
+
+Axon is heavily based on the principles of Domain-Driven Design (DDD) and Command Query Responsibility Separation. While a full explanation of these concepts is beyond the scope and intent of this reference guide, we do want to provide a summary of the most important concepts in the context of an Axon application.
 
 ## Strategic concepts
 
@@ -48,22 +54,22 @@ Therefore, there are a number of rules for Models and Contexts:
 
 A bounded context never lives entirely on its own. Information from different contexts will eventually be synchronized. It is useful to model this interaction explicitly. Domain-Driven Design names a few relationships between contexts, which drive the way they interact:
 
-* partnership \(two contexts/teams combine efforts to build interaction\)
-* customer-supplier \(two teams in upstream/downstream relationship - upstream can succeed independently of downstream team\)
-* conformist \(two teams in upstream/downstream relationship - upstream has no motivation to provide to downstream, and downstream team does not put effort in translation\)
-* shared kernel \(explicitly, sharing a part of the model\)
-* separate ways \(cut them loose\)
-* anti-corruption layer \(the downstream team builds a layer to prevent upstream design to 'leak' into their own models, by transforming interactions\)
+* partnership (two contexts/teams combine efforts to build interaction)
+* customer-supplier (two teams in upstream/downstream relationship - upstream can succeed independently of downstream team)
+* conformist (two teams in upstream/downstream relationship - upstream has no motivation to provide to downstream, and downstream team does not put effort in translation)
+* shared kernel (explicitly, sharing a part of the model)
+* separate ways (cut them loose)
+* anti-corruption layer (the downstream team builds a layer to prevent upstream design to 'leak' into their own models, by transforming interactions)
 
-In Axon based application, the context defines the boundary in which Events carry value. Some events may be valuable only in the context in which they are published, while others may be valuable even outside. The broader the scope in which an event \(or any message, in that respect\) is published, the more components end up coupling to the sender.
+In Axon based application, the context defines the boundary in which Events carry value. Some events may be valuable only in the context in which they are published, while others may be valuable even outside. The broader the scope in which an event (or any message, in that respect) is published, the more components end up coupling to the sender.
 
 ## Tactical concepts
 
-To build a model, DDD \(and CQRS to some extent as well\) provide a number of useful building blocks. Below are a few building blocks that are important in the context of Axon based applications.
+To build a model, DDD (and CQRS to some extent as well) provide a number of useful building blocks. Below are a few building blocks that are important in the context of Axon based applications.
 
 ### Aggregates
 
-An Aggregate is an entity or group of entities that is always kept in a consistent state \(within a single ACID transaction\). The Aggregate Root is the entity within the aggregate that is responsible for maintaining this consistent state. This makes the aggregate the prime building block for implementing a command model in any CQRS based application.
+An Aggregate is an entity or group of entities that is always kept in a consistent state (within a single ACID transaction). The Aggregate Root is the entity within the aggregate that is responsible for maintaining this consistent state. This makes the aggregate the prime building block for implementing a command model in any CQRS based application.
 
 The formal definition, by DDD is:
 
@@ -73,13 +79,12 @@ In CQRS based applications, Aggregates are very explicitly present in the Comman
 
 ### Saga
 
-Not every command is able to completely execute in a single atomic transaction. A very common example that pops up quite often as an argument for transactions is the money transfer. It is often believed that an atomic and consistent transaction is absolutely required to transfer money from one account to another. Well, it is not. On the contrary, it is quite impossible to do. What if money is transferred from an account on bank A \(instance A of aggregate `BankAccount`\), to another account on bank B \(instance B of aggregate `BankAccount`\)? Does bank A acquire a lock in bank B's database? If the transfer is in progress, is it strange that bank A has deducted the amount, but bank B has not deposited it yet? Not really, it's "underway". On the other hand, if something goes wrong while depositing the money on bank B's account, bank A's customer would want his money back. So we do expect some form of consistency, eventually. Another example could be `GiftCardPaymentSaga` which would start once the order is placed \(`OrderPlacedEvent`\). It will make sure that once the gift card is successfully redeemed \(`CardRedeemedEvent`\), an order is confirmed \(`ConfirmGiftCardPaymentCommand`\) on the other side.
+Not every command is able to completely execute in a single atomic transaction. A very common example that pops up quite often as an argument for transactions is the money transfer. It is often believed that an atomic and consistent transaction is absolutely required to transfer money from one account to another. Well, it is not. On the contrary, it is quite impossible to do. What if money is transferred from an account on bank A (instance A of aggregate `BankAccount`), to another account on bank B (instance B of aggregate `BankAccount`)? Does bank A acquire a lock in bank B's database? If the transfer is in progress, is it strange that bank A has deducted the amount, but bank B has not deposited it yet? Not really, it's "underway". On the other hand, if something goes wrong while depositing the money on bank B's account, bank A's customer would want his money back. So we do expect some form of consistency, eventually. Another example could be `GiftCardPaymentSaga` which would start once the order is placed (`OrderPlacedEvent`). It will make sure that once the gift card is successfully redeemed (`CardRedeemedEvent`), an order is confirmed (`ConfirmGiftCardPaymentCommand`) on the other side.
 
 While ACID transactions are not necessary or even impossible in some cases, some form of transaction management is still required. Typically, these transactions are referred to as BASE transactions: Basically Available, Soft state, Eventual consistency. Contrary to ACID, BASE transactions cannot be easily rolled back. To roll back, compensating actions need to be taken to revert anything that has occurred as part of the transaction. In the gift card example, a redeem failure of `GiftCard`, will reject the `Order` payment.
 
-In CQRS, Sagas can be used to manage these BASE transactions. They respond to events and may dispatch commands, invoke external applications, etc. In the context of Domain-Driven Design, it is common for Sagas to be used as coordination mechanism between different aggregates \(or aggregate instances\) in order to eventually achieve consistency.
+In CQRS, Sagas can be used to manage these BASE transactions. They respond to events and may dispatch commands, invoke external applications, etc. In the context of Domain-Driven Design, it is common for Sagas to be used as coordination mechanism between different aggregates (or aggregate instances) in order to eventually achieve consistency.
 
 ### View Models or Projections
 
-In CQRS, View Models \(also known as Projections or Query Models\) are used to efficiently expose information about the application's state. Unlike Command Models, view models focus on data, rather than behavior. View models are generally modeled to accommodate information needs of a specific audience. These models should clearly express the intended audience of the model, to prevent 'distraction' and scope creep, which ultimately leads to loss of maintainability and even performance.
-
+In CQRS, View Models (also known as Projections or Query Models) are used to efficiently expose information about the application's state. Unlike Command Models, view models focus on data, rather than behavior. View models are generally modeled to accommodate information needs of a specific audience. These models should clearly express the intended audience of the model, to prevent 'distraction' and scope creep, which ultimately leads to loss of maintainability and even performance.

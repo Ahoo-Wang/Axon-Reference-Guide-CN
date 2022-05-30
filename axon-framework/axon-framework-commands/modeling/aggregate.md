@@ -1,14 +1,10 @@
----
-description: Aggregate
----
-
-# 聚合
+# Aggregate
 
 This chapter will cover the basics on how to implement an '[Aggregate](../../../architecture-overview/ddd-cqrs-concepts.md#aggregates)'. For more details on what an Aggregate is read the [DDD and CQRS concepts](../../../architecture-overview/ddd-cqrs-concepts.md) page.
 
 ## Basic Aggregate Structure
 
-An Aggregate is a regular object, which contains state and methods to alter that state. When creating the Aggregate object, you are effectively creating the 'Aggregate Root', typically carrying the name of the entire Aggregate. For the purpose of this description the 'Gift Card' domain will be used, which brings us the `GiftCard` as the Aggregate (Root). By default, Axon will configure your Aggregate as an 'Event Sourced' Aggregate (as described [here](../../../architecture-overview/event-sourcing.md)). Henceforth our basic `GiftCard` Aggregate structure will focus on the Event Sourcing approach:
+An Aggregate is a regular object, which contains state and methods to alter that state. When creating the Aggregate object, you are effectively creating the 'Aggregate Root', typically carrying the name of the entire Aggregate. For the purpose of this description the 'Gift Card' domain will be used, which brings us the `GiftCard` as the Aggregate \(Root\). By default, Axon will configure your Aggregate as an 'Event Sourced' Aggregate \(as described [here](../../../architecture-overview/event-sourcing.md)\). Henceforth our basic `GiftCard` Aggregate structure will focus on the Event Sourcing approach:
 
 ```java
 import org.axonframework.commandhandling.CommandHandler;
@@ -42,29 +38,35 @@ public class GiftCard {
 
 There are a couple of noteworthy concepts from the given code snippets, marked with numbered Java comments referring to the following bullets:
 
-1. The `@AggregateIdentifier` is the external reference point to into the `GiftCard` Aggregate. This field is a hard requirement, as without it Axon will not know to which Aggregate a given Command is targeted. Note that this annotation can be placed on a field and a method.
-2.  A `@CommandHandler` annotated constructor, or differently put the 'command handling constructor'.
+1. The `@AggregateIdentifier` is the external reference point to into the `GiftCard` Aggregate.
+   This field is a hard requirement, as without it Axon will not know to which Aggregate a given Command is targeted.
+   Note that this annotation can be placed on a field and a method.
 
-    This annotation tells the framework that the given constructor is capable of handling the `IssueCardCommand`.
+2. A `@CommandHandler` annotated constructor, or differently put the 'command handling constructor'.
 
-    The `@CommandHandler` annotated functions are the place where you would put your _decision-making/business logic_.
-3.  The static `AggregateLifecycle#apply(Object...)` is what is used when an Event Message should be published.
+   This annotation tells the framework that the given constructor is capable of handling the `IssueCardCommand`.
 
-    Upon calling this function the provided `Object`s will be published as `EventMessage`s within the scope of the Aggregate they are applied in.
-4.  Using the `@EventSourcingHandler` is what tells the framework that the annotated function should be called when the Aggregate is 'sourced from its events'.
+   The `@CommandHandler` annotated functions are the place where you would put your _decision-making/business logic_.
 
-    As all the Event Sourcing Handlers combined will form the Aggregate, this is where all the _state changes_ happen.
+3. The static `AggregateLifecycle#apply(Object...)` is what is used when an Event Message should be published.
 
-    Note that the Aggregate Identifier **must** be set in the `@EventSourcingHandler` of the very first Event published by the aggregate.
+   Upon calling this function the provided `Object`s will be published as `EventMessage`s within the scope of the Aggregate they are applied in.
 
-    This is usually the creation event. Lastly, `@EventSourcingHandler` annotated functions are resolved using specific rules.
+4. Using the `@EventSourcingHandler` is what tells the framework that the annotated function should be called when the Aggregate is 'sourced from its events'.
 
-    These rules are the same for the `@EventHandler` annotated methods, and are thoroughly explained in [Annotated Event Handler.](../../events/event-handlers.md)
-5.  A no-arg constructor, which is required by Axon.
+   As all the Event Sourcing Handlers combined will form the Aggregate, this is where all the _state changes_ happen.
 
-    Axon Framework uses this constructor to create an empty aggregate instance before initializing it using past Events.
+   Note that the Aggregate Identifier **must** be set in the `@EventSourcingHandler` of the very first Event published by the aggregate.
 
-    Failure to provide this constructor will result in an exception when loading the Aggregate.
+   This is usually the creation event. Lastly, `@EventSourcingHandler` annotated functions are resolved using specific rules.
+
+   These rules are the same for the `@EventHandler` annotated methods, and are thoroughly explained in [Annotated Event Handler.](../../events/event-handlers.md)
+
+5. A no-arg constructor, which is required by Axon.
+
+   Axon Framework uses this constructor to create an empty aggregate instance before initializing it using past Events.
+
+   Failure to provide this constructor will result in an exception when loading the Aggregate.
 
 > **Modifiers for Message Handling functions**
 >
@@ -76,21 +78,25 @@ There are a couple of noteworthy concepts from the given code snippets, marked w
 
 There are a couple of operations which are desirable to be performed whilst in the life cycle of an Aggregate. To that end, the `AggregateLifecycle` class in Axon provides a couple of static functions:
 
-1.  `apply(Object)` and `apply(Object, MetaData)`: The `AggregateLifecycle#apply` will publish an Event message on an `EventBus` such that it is known to have originated from the Aggregate executing the operation.
+1. `apply(Object)` and `apply(Object, MetaData)`: The `AggregateLifecycle#apply` will publish an Event message on an `EventBus` such that it is known to have originated from the Aggregate executing the operation.
 
-    There is the possibility to provide just the Event `Object` or both the Event and some specific [MetaData](../../messaging-concepts/anatomy-message.md#meta-data).
-2.  `createNew(Class, Callable)`: Instantiate a new Aggregate as a result of handling a Command.
+   There is the possibility to provide just the Event `Object` or both the Event and some specific [MetaData](../../messaging-concepts/anatomy-message.md#meta-data).
 
-    Read [this](aggregate-creation-from-another-aggregate.md) for more details on this.
-3.  `isLive()`: Check to verify whether the Aggregate is in a 'live' state.
+2. `createNew(Class, Callable)`: Instantiate a new Aggregate as a result of handling a Command.
 
-    An Aggregate is regarded to be 'live' if it has finished replaying historic events to recreate it's state.
+   Read [this](aggregate-creation-from-another-aggregate.md) for more details on this.
 
-    If the Aggregate is thus in the process of being event sourced, an `AggregateLifecycle.isLive()` call would return `false`.
+3. `isLive()`: Check to verify whether the Aggregate is in a 'live' state.
 
-    Using this `isLive()` method, you can perform activity that should only be done when handling newly generated events.
-4.  `markDeleted()`: Will mark the Aggregate instance calling the function as being 'deleted'.
+   An Aggregate is regarded to be 'live' if it has finished replaying historic events to recreate it's state.
 
-    Useful if the domain specifies a given Aggregate can be removed/deleted/closed, after which it should no longer be allowed to handle any Commands.
+   If the Aggregate is thus in the process of being event sourced, an `AggregateLifecycle.isLive()` call would return `false`.
 
-    This function should be called from an `@EventSourcingHandler` annotated function to ensure that _being marked deleted_ is part of that Aggregate's state.
+   Using this `isLive()` method, you can perform activity that should only be done when handling newly generated events.
+
+4. `markDeleted()`: Will mark the Aggregate instance calling the function as being 'deleted'.
+
+   Useful if the domain specifies a given Aggregate can be removed/deleted/closed, after which it should no longer be allowed to handle any Commands.
+
+   This function should be called from an `@EventSourcingHandler` annotated function to ensure that _being marked deleted_ is part of that Aggregate's state.
+

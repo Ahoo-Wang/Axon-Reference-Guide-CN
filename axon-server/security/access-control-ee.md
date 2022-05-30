@@ -1,8 +1,4 @@
----
-description: Access Control - Enterprise Edition
----
-
-# 访问控制 - 企业版
+# Access Control for Axon Server EE
 
 When you set the "`axoniq.axonserver.accesscontrol.enabled`" property to "`true`", Axon Server will require a token or user account for access to its APIs.
 
@@ -10,11 +6,11 @@ When you set the "`axoniq.axonserver.accesscontrol.enabled`" property to "`true`
 
 In Axon Server EE, there are three types of tokens that can be defined:
 
-| Type        | Property                                          | Purpose                                                                                         |
-| ----------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Internal    | `axoniq.axonserver.accesscontrol.internal-token`  | Define a token for nodes in the cluster to authenticate each other.                             |
-| System      | `axoniq.axonserver.accesscontrol.systemtokenfile` | Define a file for a token with administrative rights. Default value is "`./security/.token`".   |
-| Application | _(Through the UI or CLI)_                         | Applications are registered using the UI or CLI and assigned roles. See below for more details. |
+| Type | Property | Purpose |
+| :--- | :--- | :--- |
+| Internal | `axoniq.axonserver.accesscontrol.internal-token` | Define a token for nodes in the cluster to authenticate each other. |
+| System | `axoniq.axonserver.accesscontrol.systemtokenfile` | Define a file for a token with administrative rights. Default value is "`./security/.token`". |
+| Application | _(Through the UI or CLI)_ | Applications are registered using the UI or CLI and assigned roles. See below for more details. |
 
 Axon Server will generate the system token for the CLI if none is found, and the CLI (if started in the Axon Server working directory) will know the default location.
 
@@ -51,27 +47,27 @@ In Axon Server EE we can grant specific roles to applications and users that wil
 
 A summary of the various roles is depicted below
 
-| Role Name                   | Description                                                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| ADMIN                       | Administer the cluster, manage contexts, users and applications                                                           |
-| VIEW\_CONFIGURATION         | View cluster configuration with contexts, users, applications, replication groups, and plugins (only for \_admin context) |
-| CONTEXT\_ADMIN              | Manage event processors within a specific context                                                                         |
-| DISPATCH\_COMMANDS          | Dispatch commands                                                                                                         |
-| DISPATCH\_QUERY             | Dispatch queries and subscription queries                                                                                 |
-| MONITOR                     | View context information                                                                                                  |
-| PUBLISH\_EVENTS             | Publish events and snapshots                                                                                              |
-| READ\_EVENTS                | Read events and snapshots from the event store                                                                            |
-| SUBSCRIBE\_COMMAND\_HANDLER | Register command handlers                                                                                                 |
-| SUBSCRIBE\_QUERY\_HANDLER   | Register query handlers                                                                                                   |
-| USE\_CONTEXT                | Perform all operations on a context                                                                                       |
-| READ (Deprecated)           | Read events and perform queries                                                                                           |
-| WRITE (Deprecated)          | Publish events and perform commands                                                                                       |
+| Role Name | Description |
+| :--- | :--- |
+| ADMIN | Administer the cluster, manage contexts, users and applications |
+| VIEW\_CONFIGURATION | View cluster configuration with contexts, users, applications, replication groups, and plugins (only for \_admin context) | 
+| CONTEXT\_ADMIN | Manage event processors within a specific context |
+| DISPATCH\_COMMANDS | Dispatch commands |
+| DISPATCH\_QUERY | Dispatch queries and subscription queries |
+| MONITOR | View context information |
+| PUBLISH\_EVENTS | Publish events and snapshots |
+| READ\_EVENTS | Read events and snapshots from the event store |
+| SUBSCRIBE\_COMMAND\_HANDLER | Register command handlers |
+| SUBSCRIBE\_QUERY\_HANDLER | Register query handlers |
+| USE\_CONTEXT | Perform all operations on a context |
+| READ \(Deprecated\) | Read events and perform queries |
+| WRITE \(Deprecated\) | Publish events and perform commands |
 
 ### Accounts without a password
 
 Using the CLI it is possible to create an account without a password. This does not mean that the account requires no password to login, but rather that the account is only used to assign roles to, while the password needs to be checked using an external tool. To create such an account, use the "`--no-password`" option:
 
-```
+```text
 $ java -jar axonserver-cli.jar register-user -u username -r roles --no-password
 ```
 

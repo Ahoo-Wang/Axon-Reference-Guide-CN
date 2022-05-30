@@ -1,25 +1,27 @@
----
-description: Event Handlers
----
+# Event Handlers
 
-# 事件处理程序
+An _Event Handler_ is a method that is capable of handling an `EventMessage`.
+As such, the method will react to the occurrences within an application.
 
-An _Event Handler_ is a method that is capable of handling an `EventMessage`. As such, the method will react to the occurrences within an application.
+In Axon, an _object_ may declare several event handlers by annotating them with `@EventHandler`.
+This _object_ is most often referred to as an _Event Handling Component_, or simply an Event Handler.
+When drafting an `@EventHandler` annotated method, the declared parameters of the method define which events it will receive.
 
-In Axon, an _object_ may declare several event handlers by annotating them with `@EventHandler`. This _object_ is most often referred to as an _Event Handling Component_, or simply an Event Handler. When drafting an `@EventHandler` annotated method, the declared parameters of the method define which events it will receive.
+Arguably the most important parameter of an event handler is the first parameter which refers to the payload of an `EventMessage`.
+If the event handler does not need access to the payload of the message, you can specify the expected payload type on the `@EventHandler` annotation.
 
-Arguably the most important parameter of an event handler is the first parameter which refers to the payload of an `EventMessage`. If the event handler does not need access to the payload of the message, you can specify the expected payload type on the `@EventHandler` annotation.
+Do not configure the payload type on the annotation if you want the payload to be passed as a parameter.
+For a complete list of all parameters, we refer to [this](../messaging-concepts/supported-parameters-annotated-handlers.md#supported-parameters-for-event-handlers) section.
 
-Do not configure the payload type on the annotation if you want the payload to be passed as a parameter. For a complete list of all parameters, we refer to [this](../messaging-concepts/supported-parameters-annotated-handlers.md#supported-parameters-for-event-handlers) section.
+In all circumstances, at most one event handler method is invoked per listener instance.
+Axon will search for the most specific method to invoke, using the following rules:
 
-In all circumstances, at most one event handler method is invoked per listener instance. Axon will search for the most specific method to invoke, using the following rules:
-
-1. On the actual instance level of the class hierarchy (as returned by `this.getClass()`), all annotated methods are evaluated.
+1. On the actual instance level of the class hierarchy \(as returned by `this.getClass()`\), all annotated methods are evaluated.
 2. If the framework finds one or more methods for which it can resolve all parameters to a value, the method with the most specific type is chosen and invoked.
 3. If the framework finds no methods on this level of the class hierarchy, the supertype is evaluated the same way.
 4. When it reaches the top level of the hierarchy and no suitable event handler is found, the event is ignored.
 
-Consider the following Event Handling Component sample to explain the event handler invocation rules further:
+Consider the following Event Handling Component sample to explain the event handler invocation rules further: 
 
 ```java
 // assume EventB extends EventA 
@@ -47,11 +49,15 @@ public class SubListener extends TopListener {
 }
 ```
 
-In the example above, Axon will invoke the handler methods of `SubListener` for all instances of `EventB` and `EventC` (as it extends `EventB`). In other words, the handler methods of `TopListener` will not receive any invocations for `EventC` at all. Since `EventA` is not assignable to `EventB` (it is its superclass), the `TopListener's` handler method will process them.
+In the example above, Axon will invoke the handler methods of `SubListener` for all instances of `EventB` and `EventC` \(as it extends `EventB`\).
+In other words, the handler methods of `TopListener` will not receive any invocations for `EventC` at all.
+Since `EventA` is not assignable to `EventB` \(it is its superclass\), the `TopListener's` handler method will process them.
 
 ## Registering event handlers
 
-Event handling Components are defined using an `EventProcessingConfigurer`, which can be accessed from the global Axon `Configurer`. `EventProcessingConfigurer` is used to configure an `EventProcessingConfiguration`. Typically, an application will have a single `EventProcessingConfiguration` defined, but larger, more modular applications may define one per module.
+Event handling Components are defined using an `EventProcessingConfigurer`, which can be accessed from the global Axon `Configurer`.
+`EventProcessingConfigurer` is used to configure an `EventProcessingConfiguration`.
+Typically, an application will have a single `EventProcessingConfiguration` defined, but larger, more modular applications may define one per module.
 
 To register objects with `@EventHandler` methods, consider the following samples:
 

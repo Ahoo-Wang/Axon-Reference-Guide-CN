@@ -1,18 +1,22 @@
-# Event Sourcing
+---
+description: Event Sourcing
+---
+
+# 事件溯源
 
 In a traditional way of storing an application’s state, we capture the current state and store it in some relational or [NoSQL](https://en.wikipedia.org/wiki/NoSQL) database. While this approach is really straightforward, it does not provide a way of deducing how we got to that current state. Of course, one may argue that we can have a separate model for keeping the history of actions that lead to the current state, but besides the additional complexity, these two models could easily go different paths and start being inconsistent
 
-Event Sourcing is a way of storing an application’s state through the history of events that have happened in the past. The current state is reconstructed based on the full history of events, where each event represents a change or fact in our application. Events give us a single source of truth about what happened in our application. It is especially beneficial in applications that need to provide a full audit log to external reviewers. The current state is called _Materialized state_ in some resources \(see _Figure 1_\).
+Event Sourcing is a way of storing an application’s state through the history of events that have happened in the past. The current state is reconstructed based on the full history of events, where each event represents a change or fact in our application. Events give us a single source of truth about what happened in our application. It is especially beneficial in applications that need to provide a full audit log to external reviewers. The current state is called _Materialized state_ in some resources (see _Figure 1_).
 
 ![Events as the source to construct state](../.gitbook/assets/materialized-state.jpeg)
 
-Let's see on an example how Event Sourcing differs from Traditional Storage \(see Figure 2\). In Traditional Storage system we only know that we have ordered a pizza and a cola. In Event Sourcing, we see that a user selected a pizza, selected a cola, selected an ice cream and deselected an ice cream. Information about selection/deselection of an ice cream is not present in Traditional Storage. With Event Sourcing we can reason about why a user deselected an ice cream, was the price too high, or some other reason. The point is that we didn't lose that information and we can benefit from it in various ways. Later on we can see that a user confirmed the order.
+Let's see on an example how Event Sourcing differs from Traditional Storage (see Figure 2). In Traditional Storage system we only know that we have ordered a pizza and a cola. In Event Sourcing, we see that a user selected a pizza, selected a cola, selected an ice cream and deselected an ice cream. Information about selection/deselection of an ice cream is not present in Traditional Storage. With Event Sourcing we can reason about why a user deselected an ice cream, was the price too high, or some other reason. The point is that we didn't lose that information and we can benefit from it in various ways. Later on we can see that a user confirmed the order.
 
 ![Traditional Storage v/s Event Sourcing](../.gitbook/assets/tradvseventsourcing.png)
 
 ## Event Store
 
-Event Sourcing require an Event Store to store events. Since events are not to be modified \(an event is a fact that something happened and facts cannot be modified\), an Event Store should be optimized for appends. Event ordering plays a really important role in event-sourced systems - as many times as we are reconstructing our materialized state, we want to arrive at the same result.
+Event Sourcing require an Event Store to store events. Since events are not to be modified (an event is a fact that something happened and facts cannot be modified), an Event Store should be optimized for appends. Event ordering plays a really important role in event-sourced systems - as many times as we are reconstructing our materialized state, we want to arrive at the same result.
 
 [Axon Server ](../axon-server-introduction.md)is the default choice within Axon and it offers an _**enterprise grade**_ _**purpose-built event store**_ which is highly optimized for storing/retrieving events. The Server is available as a Standard Edition or an Enterprise Edition.
 
@@ -40,7 +44,7 @@ The full history of interactions with our application is stored in the Event Sto
 
 _Design Flexibility_
 
-Agile approach to building software systems requires that we should be able to adapt to any change coming along the way. Ability to replay the event stream from the beginning of time with new business logic means that we don’t have to worry about decisions we make \(apart from which events are important to be stored\), we can always fix the behaviour later. Introducing new views to our event stream means adding a new component with event listeners to the solution.
+Agile approach to building software systems requires that we should be able to adapt to any change coming along the way. Ability to replay the event stream from the beginning of time with new business logic means that we don’t have to worry about decisions we make (apart from which events are important to be stored), we can always fix the behaviour later. Introducing new views to our event stream means adding a new component with event listeners to the solution.
 
 _Temporal Reports_
 
@@ -52,7 +56,6 @@ In software systems where our business can benefit from the history of events th
 
 Integration with external systems can be done using events. In such scenarios, events are our API and external system must understand them. Of course, we might not publish all events to the integration event hub, only ones that are _publicly important_.
 
-_\* If we are applying CQRS \(Command Query Responsibility Segregation\) practices, we could rebuild our command model and query model as well_
+_\* If we are applying CQRS (Command Query Responsibility Segregation) practices, we could rebuild our command model and query model as well_
 
 [Axon Server](../axon-server-introduction.md) provides an easy way to start up and scale event-sourced Java applications.
-

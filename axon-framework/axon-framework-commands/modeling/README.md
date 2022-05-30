@@ -1,6 +1,2 @@
----
-description: Modeling
----
-
-# 建模
+# Modeling
 

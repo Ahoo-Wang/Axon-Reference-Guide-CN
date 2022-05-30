@@ -1,8 +1,4 @@
----
-description: State Stored Aggregates
----
-
-# 聚合状态存储
+# State Stored Aggregates
 
 In the [Aggregate](aggregate.md) main page we have seen how to create an Aggregate backed by Event Sourcing. In other words, the storage method for an Event Sourced Aggregate is by replaying the events which constitute the changes on the Aggregate.
 
@@ -79,34 +75,40 @@ public class GiftCard {
 
 The above exert shows an state stored Aggregate from a 'Gift Card Service'. The numbered comments in the snippet point out Axon specifics which are explained here:
 
-1. As the Aggregate is stored in a JPA repository, it is required to annotated the class with `@Entity`.
-2.  An Aggregate Root must declare a field that contains the Aggregate Identifier.
+1. As the Aggregate is stored in a JPA repository, it is required to annotated the class with `@Entity`.  
+2. An Aggregate Root must declare a field that contains the Aggregate Identifier.
 
-    This identifier must be initialized at the latest when the first event is published.
+   This identifier must be initialized at the latest when the first event is published.
 
-    This identifier field must be annotated by the `@AggregateIdentifier` annotation.
+   This identifier field must be annotated by the `@AggregateIdentifier` annotation.
 
-    When using JPA to store the Aggregate, Axon knows to use the `@Id` annotation provided by JPA.
+   When using JPA to store the Aggregate, Axon knows to use the `@Id` annotation provided by JPA.
 
-    Since the Aggregate is an entity, the `@Id` annotation is a hard requirement.
-3.  This Aggregate has several '[Aggregate Members](multi-entity-aggregates.md)'.
+   Since the Aggregate is an entity, the `@Id` annotation is a hard requirement.
 
-    Since the Aggregate is stored as is, correct mapping of the entities should be taking into account.
-4.  A `@CommandHandler` annotated constructor, or differently put the 'command handling constructor'.
+3. This Aggregate has several '[Aggregate Members](multi-entity-aggregates.md)'.
 
-    This annotation tells the framework that the given constructor is capable of handling the `IssueCardCommand`.
-5.  The static `AggregateLifecycle#apply(Object...)` may be used to publish an Event Message.
+   Since the Aggregate is stored as is, correct mapping of the entities should be taking into account.
 
-    Upon calling this function the provided `Object`s will be published as `EventMessage`s within the scope of the Aggregate they are applied in.
+4. A `@CommandHandler` annotated constructor, or differently put the 'command handling constructor'.
+
+   This annotation tells the framework that the given constructor is capable of handling the `IssueCardCommand`.
+
+5. The static `AggregateLifecycle#apply(Object...)` may be used to publish an Event Message.
+
+   Upon calling this function the provided `Object`s will be published as `EventMessage`s within the scope of the Aggregate they are applied in.
+
 6. The Command Handling method will first decide whether the incoming Command is valid to handle at this point.
 7. After the business logic has been validated, the state of the Aggregate may be adjusted
-8.  Entities within an Aggregate can listen to the events the Aggregate publishes, by defining an `@EventHandler` annotated method.
+8. Entities within an Aggregate can listen to the events the Aggregate publishes, by defining an `@EventHandler` annotated method.
 
-    These methods will be invoked when an Event Message is published prior to being handled by any external handlers.
-9.  A no-arg constructor, which is required by JPA.
+   These methods will be invoked when an Event Message is published prior to being handled by any external handlers.
 
-    Failure to provide this constructor will result in an exception when loading the Aggregate.
+9. A no-arg constructor, which is required by JPA.
+
+   Failure to provide this constructor will result in an exception when loading the Aggregate.
 
 > **Adjusting state in Command Handlers**
 >
 > Differently from [Event Sourced Aggregates](aggregate.md), State-Stored Aggregates can pair the decision making logic and state changes in a Command Handler. There are no consequences for State-Stored Aggregates in following this paradigm as there are no Event Sourcing Handlers which drive it's state.
+

@@ -1,8 +1,4 @@
----
-description: Configuration
----
-
-# 配置
+# Configuration
 
 This page aims to describe the suite of options for configuring the Command Model.
 
@@ -20,7 +16,7 @@ Configurer configurer = DefaultConfigurer.defaultConfiguration()
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-The `@Aggregate` annotation (in the `org.axonframework.spring.stereotype` package) triggers auto configuration to set up the necessary components to use the annotated type as an aggregate. Note that only the aggregate root needs to be annotated.
+The `@Aggregate` annotation \(in the `org.axonframework.spring.stereotype` package\) triggers auto configuration to set up the necessary components to use the annotated type as an aggregate. Note that only the aggregate root needs to be annotated.
 
 Axon will automatically register all the `@CommandHandler` annotated methods with the command bus and set up a repository if none is present.
 
@@ -111,9 +107,9 @@ public class GiftCardCommandHandler {
 
 The repository is the mechanism that provides access to aggregates. The repository acts as a gateway to the actual storage mechanism used to persist the data. In CQRS, repositories only need to be able to find aggregates based on their unique identifier. Any other types of queries should be performed against the query database.
 
-In Axon Framework, all repositories must implement the `Repository` interface. This interface prescribes three methods: `load(identifier, version)`, `load(identifier)` and `newInstance(factoryMethod)`. The `load` methods allows you to load aggregates from the repository. The optional `version` parameter is used to detect concurrent modifications (see [Conflict resolution](modeling/conflict-resolution.md)). `newInstance` is used to register newly created aggregates in the repository.
+In Axon Framework, all repositories must implement the `Repository` interface. This interface prescribes three methods: `load(identifier, version)`, `load(identifier)` and `newInstance(factoryMethod)`. The `load` methods allows you to load aggregates from the repository. The optional `version` parameter is used to detect concurrent modifications \(see [Conflict resolution](modeling/conflict-resolution.md)\). `newInstance` is used to register newly created aggregates in the repository.
 
-Depending on your underlying persistence storage and auditing needs, there are a number of base implementations that provide basic functionality needed by most repositories. Axon Framework makes a distinction between repositories that save the current state of the aggregate (see [Standard repositories](configuration.md#standard-repositories)), and those that store the events of an aggregate (see [Event Sourcing repositories](configuration.md#event-sourcing-repositories)).
+Depending on your underlying persistence storage and auditing needs, there are a number of base implementations that provide basic functionality needed by most repositories. Axon Framework makes a distinction between repositories that save the current state of the aggregate \(see [Standard repositories](configuration.md#standard-repositories)\), and those that store the events of an aggregate \(see [Event Sourcing repositories](configuration.md#event-sourcing-repositories)\).
 
 Note that the Repository interface does not prescribe a `delete(identifier)` method. Deleting aggregates is done by invoking the `AggregateLifecycle.markDeleted()` method from within an aggregate. Deleting an aggregate is a state migration like any other, with the only difference that it is irreversible in many cases. You should create your own meaningful method on your aggregate which sets the aggregate's state to "deleted". This also allows you to register any events that you would like to have published.
 
@@ -131,7 +127,7 @@ Configurer configurer = DefaultConfigurer.defaultConfiguration()
 {% endtab %}
 
 {% tab title="Spring Boot AutoConfiguration" %}
-To fully customize the repository used, you can define one in the application context. For Axon Framework to use this repository for the intended aggregate, define the bean name of the repository in the `repository` attribute on `@Aggregate` Annotation. Alternatively, specify the bean name of the repository to be the aggregate's name, (first character lowercase), suffixed with `Repository`. So on a class of type `GiftCard`, the default repository name is `giftCardRepository`. If no bean with that name is found, Axon will define an `EventSourcingRepository` (which fails if no `EventStore` is available).
+To fully customize the repository used, you can define one in the application context. For Axon Framework to use this repository for the intended aggregate, define the bean name of the repository in the `repository` attribute on `@Aggregate` Annotation. Alternatively, specify the bean name of the repository to be the aggregate's name, \(first character lowercase\), suffixed with `Repository`. So on a class of type `GiftCard`, the default repository name is `giftCardRepository`. If no bean with that name is found, Axon will define an `EventSourcingRepository` \(which fails if no `EventStore` is available\).
 
 ```java
 @Bean
@@ -159,7 +155,7 @@ You can also easily implement your own repository. In that case, it is best to e
 
 Aggregate roots that are able to reconstruct their state based on events may also be configured to be loaded by an event sourcing repository. Those repositories do not store the aggregate itself, but the series of events generated by the aggregate. Based on these events, the state of an aggregate can be restored at any time.
 
-The `EventSourcingRepository` implementation provides the basic functionality needed by any event sourcing repository in the Axon Framework. It depends on an `EventStore` (see [Event store implementations](../events/event-bus-and-event-store.md)), which abstracts the actual storage mechanism for the events.
+The `EventSourcingRepository` implementation provides the basic functionality needed by any event sourcing repository in the Axon Framework. It depends on an `EventStore` \(see [Event store implementations](../events/event-bus-and-event-store.md)\), which abstracts the actual storage mechanism for the events.
 
 ## Aggregate Factories
 
@@ -173,14 +169,15 @@ The `GenericAggregateFactory` is suitable for most scenarios where aggregates do
 
 ### SpringPrototypeAggregateFactory
 
-Depending on your architectural choices, it might be useful to inject dependencies into your aggregates using Spring. You could, for example, inject query repositories into your aggregate to ensure the existence (or nonexistence) of certain values.
+Depending on your architectural choices, it might be useful to inject dependencies into your aggregates using Spring. You could, for example, inject query repositories into your aggregate to ensure the existence \(or nonexistence\) of certain values.
 
 To inject dependencies into your aggregates, you need to configure a prototype bean of your aggregate root in the Spring context that also defines the `SpringPrototypeAggregateFactory`. Instead of creating regular instances of using a constructor, it uses the Spring Application Context to instantiate your aggregates. This will also inject any dependencies in your aggregate.
 
 ### Implementing your own Aggregate Factory
 
-In some cases, the `GenericAggregateFactory` just doesn't deliver what you need. For example, you could have an abstract aggregate type with multiple implementations for different scenarios (e.g. `PublicUserAccount` and `BackOfficeAccount` both extending an `Account`). Instead of creating different repositories for each of the aggregates, you could use a single repository, and configure an AggregateFactory that is aware of the different implementations.
+In some cases, the `GenericAggregateFactory` just doesn't deliver what you need. For example, you could have an abstract aggregate type with multiple implementations for different scenarios \(e.g. `PublicUserAccount` and `BackOfficeAccount` both extending an `Account`\). Instead of creating different repositories for each of the aggregates, you could use a single repository, and configure an AggregateFactory that is aware of the different implementations.
 
 The bulk of the work the aggregate factory does is creating uninitialized aggregate instances. It must do so using a given aggregate identifier and the first event from the stream. Usually, this event is a creation event which contains hints about the expected type of aggregate. You can use this information to choose an implementation and invoke its constructor. Make sure no events are applied by that constructor; the aggregate must be uninitialized.
 
 Initializing aggregates based on the events can be a time-consuming effort, compared to the direct aggregate loading of the simple repository implementations. The `CachingEventSourcingRepository` provides a cache from which aggregates can be loaded if available.
+

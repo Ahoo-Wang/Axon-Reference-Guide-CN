@@ -1,14 +1,18 @@
+---
+description: Deadline Managers
+---
+
 # Deadline Managers
 
 Deadlines can be scheduled from sagas and aggregates. The `DeadlineManager` component is responsible for scheduling deadlines and invoking `@DeadlineHandler`when the deadline is met. The `DeadlineManager` can be injected as a resource. It has two flavors: `SimpleDeadlineManager` and `QuartzDeadlineManager`
 
 ## Scheduling a Deadline
 
-A deadline can be scheduled by providing a `Duration` after which it will be triggered \(or an `Instant` at which it will be triggered\) and a _deadline name_.
+A deadline can be scheduled by providing a `Duration` after which it will be triggered (or an `Instant` at which it will be triggered) and a _deadline name_.
 
 > **Scheduled Events or Scheduled Deadlines**
 >
-> Unlike [Event Scheduling](event-schedulers.md), when a deadline is triggered there will be no storing of the published message. Scheduling/Triggering a deadline does not involve an `EventBus` \(or `EventStore`\), hence the message **is not** stored.
+> Unlike [Event Scheduling](event-schedulers.md), when a deadline is triggered there will be no storing of the published message. Scheduling/Triggering a deadline does not involve an `EventBus` (or `EventStore`), hence the message **is not** stored.
 
 ```java
 class DeadlineSchedulingComponent {
@@ -20,7 +24,7 @@ class DeadlineSchedulingComponent {
 }
 ```
 
-As a result we receive a `deadlineId` which can be used to cancel the deadline. In most cases, storing this `deadlineId` as a field within your Aggregate/Saga is the most convenient. Cancelling a deadline could come in handy when a certain event means that the previously scheduled deadline has become obsolete \(e.g. there is a deadline for paying the invoice, but the client payed the amount which means that the deadline is obsolete and can be canceled\).
+As a result we receive a `deadlineId` which can be used to cancel the deadline. In most cases, storing this `deadlineId` as a field within your Aggregate/Saga is the most convenient. Cancelling a deadline could come in handy when a certain event means that the previously scheduled deadline has become obsolete (e.g. there is a deadline for paying the invoice, but the client payed the amount which means that the deadline is obsolete and can be canceled).
 
 ```java
 class DeadlineCancelingComponent {
@@ -32,25 +36,23 @@ class DeadlineCancelingComponent {
 
 Note that there are more options to cancel a deadline next to the previously mentioned:
 
-* `cancelAll(String deadlineName)`
+*   `cancelAll(String deadlineName)`
 
-  Cancels _every_ scheduled deadline matching the given `deadlineName`.
+    Cancels _every_ scheduled deadline matching the given `deadlineName`.
 
-  Note that this thus also cancels deadlines from other aggregate and/or saga instances matching the name.
+    Note that this thus also cancels deadlines from other aggregate and/or saga instances matching the name.
+*   `cancelAllWithinScope(String deadlineName)`
 
-* `cancelAllWithinScope(String deadlineName)`
+    Cancels a scheduled deadline matching the given `deadlineName`, _within_ the `Scope` the method is invoked in.
 
-  Cancels a scheduled deadline matching the given `deadlineName`, _within_ the `Scope` the method is invoked in.
+    For example, if this operation is performed from within "aggregate instance X",
 
-  For example, if this operation is performed from within "aggregate instance X",
+    the `ScopeDescriptor` from "aggregate instance X" will be used to cancel.
+*   `cancelAllWithinScope(String deadlineName, ScopeDescriptor scope)`
 
-  the `ScopeDescriptor` from "aggregate instance X" will be used to cancel.
+    Cancels a scheduled deadline matching the given `deadlineName` _and_ `ScopeDescriptor`.
 
-* `cancelAllWithinScope(String deadlineName, ScopeDescriptor scope)`
-
-  Cancels a scheduled deadline matching the given `deadlineName` _and_ `ScopeDescriptor`.
-
-  This allows canceling a deadline by name from differing scopes then the one it's executed in.
+    This allows canceling a deadline by name from differing scopes then the one it's executed in.
 
 If you need contextual data about the deadline when the deadline is being handled, you can attach a deadline payload when scheduling a deadline:
 
@@ -75,8 +77,8 @@ We have now seen how to schedule a deadline. When the scheduled time is met, the
 > When scheduling a deadline, the context from where it was scheduled is taken into account. This means a scheduled deadline will only be triggered in its originating context. Thus any `@DeadlineHandler` annotated function you wish to be called on a met deadline, must be in the same Aggregate/Saga from which is was scheduled.
 >
 > Axon calls this context a `Scope`. If necessary, implementing and providing your own `Scope` will allow you to schedule deadlines in your custom, 'scoped' components.
-> 
-> A Saga can end its lifecycle when `@EndSaga` is added on a deadline handler. 
+>
+> A Saga can end its lifecycle when `@EndSaga` is added on a deadline handler.
 
 A `@DeadlineHandler` is matched based on the deadline name and the deadline payload.
 
@@ -105,7 +107,7 @@ public void on() {
 }
 ```
 
-## Using Time In Your  Application
+## Using Time In Your Application
 
 In cases where applications need to access the clock, they can take advantage of the clock used in the EventMessage, by accessing `GenericEventMessage.clock`. This clock is set to Clock.systemUTC at runtime, and manipulated to simulate time during [testing](../testing/).
 

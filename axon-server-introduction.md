@@ -1,3 +1,7 @@
+---
+description: Axon Server
+---
+
 # Axon Server
 
 In a message-driven microservices environment it is extremely important that communication between services is efficient, reliable and easy to manage and monitor. Routing of messages should not require any manual configuration and adding new services should be easy to do.
@@ -12,7 +16,7 @@ Applications connect to the messaging platform and register their capabilities. 
 
 ## Message patterns
 
-A client or application sends a request to the messaging platform. The platform finds the appropriate connected application\(s\) to send the request to, and forwards the request. It receives the reply, or replies, and forwards that to the caller. Commands are always sent to exactly one application. Commands for the same aggregate are always sent to the same application instance, to avoid problems with concurrent updates of the aggregate. Queries are sent to all applications capable of answering the query. If there are multiple instances of the same application, the query is only sent to one of the instances. Events are stored in the event store and sent to all registered listeners.
+A client or application sends a request to the messaging platform. The platform finds the appropriate connected application(s) to send the request to, and forwards the request. It receives the reply, or replies, and forwards that to the caller. Commands are always sent to exactly one application. Commands for the same aggregate are always sent to the same application instance, to avoid problems with concurrent updates of the aggregate. Queries are sent to all applications capable of answering the query. If there are multiple instances of the same application, the query is only sent to one of the instances. Events are stored in the event store and sent to all registered listeners.
 
 ## High Available
 
@@ -20,7 +24,7 @@ Axon Server can operate in clustered mode. Each node in the cluster is active an
 
 ## Flow control
 
-Axon Server controls the flow of messages sent to the message handlers. The message handlers sent a number of permits to the messaging platform, indicating the number of messages the messaging platform may send. Once the handler is ready for more request it sends another message with a number of additional permits. Axon Server queues messages when there are no permits for the handler left. When a handler is disconnected while there are still queued messages, these are re-routed to another handler \(if possible\).
+Axon Server controls the flow of messages sent to the message handlers. The message handlers sent a number of permits to the messaging platform, indicating the number of messages the messaging platform may send. Once the handler is ready for more request it sends another message with a number of additional permits. Axon Server queues messages when there are no permits for the handler left. When a handler is disconnected while there are still queued messages, these are re-routed to another handler (if possible).
 
 ## QoS Messages
 
@@ -39,7 +43,6 @@ Configuration information for Axon Server is stored in a small h2 database. This
 The messaging platform has 2 types of interfaces:
 
 * HTTP
-* gRPC \(HTTP 2.0\)
+* gRPC (HTTP 2.0)
 
 Communication between the standard Axon Framework Axon Server client and the messaging platform uses gRPC.
-
